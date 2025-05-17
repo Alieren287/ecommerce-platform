@@ -1,0 +1,26 @@
+2025-05-17 22:36:52.804 [main] INFO  [] c.a.e.i.c.ProductControllerTest - Starting ProductControllerTest using Java 17.0.13 with PID 23680 (started by alier in C:\ecommerce-platform\ecommerce-product-service)
+2025-05-17 22:36:52.805 [main] INFO  [] c.a.e.i.c.ProductControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-05-17 22:36:54.566 [main] WARN  [] o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 21b612b4-cd25-468c-9339-08906183937d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2025-05-17 22:36:54.595 [main] INFO  [] o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2025-05-17 22:36:54.728 [main] INFO  [] o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2025-05-17 22:36:54.728 [main] INFO  [] o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-05-17 22:36:54.729 [main] INFO  [] o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2025-05-17 22:36:54.754 [main] INFO  [] c.a.e.i.c.ProductControllerTest - Started ProductControllerTest in 2.313 seconds (process running for 3.147)
+2025-05-17 22:37:40.454 [main] INFO  [] c.a.e.i.c.ProductControllerTest - Starting ProductControllerTest using Java 17.0.13 with PID 24300 (started by alier in C:\ecommerce-platform\ecommerce-product-service)
+2025-05-17 22:37:40.454 [main] INFO  [] c.a.e.i.c.ProductControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-05-17 22:37:42.051 [main] WARN  [] o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 33b75480-3180-49ad-99ee-29548859f679
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2025-05-17 22:37:42.072 [main] INFO  [] o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2025-05-17 22:37:42.206 [main] INFO  [] o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2025-05-17 22:37:42.206 [main] INFO  [] o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-05-17 22:37:42.208 [main] INFO  [] o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2025-05-17 22:37:42.233 [main] INFO  [] c.a.e.i.c.ProductControllerTest - Started ProductControllerTest in 2.148 seconds (process running for 3.112)

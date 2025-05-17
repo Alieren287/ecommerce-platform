@@ -1,0 +1,20 @@
+2025-05-18 00:01:09.731 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Starting EcommerceWebCoreApplicationTests using Java 17.0.13 with PID 14864 (started by alier in C:\ecommerce-platform\ecommerce-web-core)
+2025-05-18 00:01:09.731 [main] DEBUG [] c.a.e.EcommerceWebCoreApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-05-18 00:01:09.731 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-05-18 00:01:10.711 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2025-05-18 00:01:10.742 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Started EcommerceWebCoreApplicationTests in 1.251 seconds (process running for 1.803)
+2025-05-18 00:10:44.822 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Starting EcommerceWebCoreApplicationTests using Java 17.0.13 with PID 20924 (started by alier in C:\ecommerce-platform\ecommerce-web-core)
+2025-05-18 00:10:44.824 [main] DEBUG [] c.a.e.EcommerceWebCoreApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-05-18 00:10:44.824 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-05-18 00:10:45.818 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2025-05-18 00:10:45.850 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Started EcommerceWebCoreApplicationTests in 1.263 seconds (process running for 1.815)
+2025-05-18 00:20:11.337 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Starting EcommerceWebCoreApplicationTests using Java 17.0.13 with PID 24768 (started by alier in C:\ecommerce-platform\ecommerce-web-core)
+2025-05-18 00:20:11.338 [main] DEBUG [] c.a.e.EcommerceWebCoreApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-05-18 00:20:11.338 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-05-18 00:20:12.326 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2025-05-18 00:20:12.355 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Started EcommerceWebCoreApplicationTests in 1.26 seconds (process running for 1.787)
+2025-05-18 00:30:37.049 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Starting EcommerceWebCoreApplicationTests using Java 17.0.13 with PID 24884 (started by alier in C:\ecommerce-platform\ecommerce-web-core)
+2025-05-18 00:30:37.049 [main] DEBUG [] c.a.e.EcommerceWebCoreApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-05-18 00:30:37.049 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-05-18 00:30:38.068 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2025-05-18 00:30:38.100 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Started EcommerceWebCoreApplicationTests in 1.297 seconds (process running for 1.842)
