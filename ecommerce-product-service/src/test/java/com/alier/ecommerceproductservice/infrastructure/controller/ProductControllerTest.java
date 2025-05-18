@@ -1,5 +1,6 @@
 package com.alier.ecommerceproductservice.infrastructure.controller;
 
+import com.alier.ecommercecore.common.dto.PaginatedResponse;
 import com.alier.ecommerceproductservice.application.dto.CreateProductRequest;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.dto.UpdateProductRequest;
@@ -9,9 +10,10 @@ import com.alier.ecommerceproductservice.application.usecase.UpdateProductUseCas
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
-import com.alier.ecommerceproductservice.infrastructure.repository.JpaProductRepository;
+import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.repository.ProductRepositoryAdapter;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
+import com.alier.ecommercewebcore.rest.exception.GlobalRestExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +21,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,8 +48,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(ProductController.class)
-@Import(ProductRepositoryAdapter.class)
+@Import({ProductRepositoryAdapter.class, ProductController.class, GlobalRestExceptionHandler.class})
 class ProductControllerTest {
+
+    @Configuration
+    @EnableWebSecurity
+    static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            return http.build();
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,10 +82,9 @@ class ProductControllerTest {
     private ProductSearchService searchService;
 
     @MockitoBean
-    private JpaProductRepository jpaProductRepository;
+    private ProductRepository productRepository; // ✅ Needed for controller injection
 
     @Test
-    @DisplayName("Should create product successfully")
     void shouldCreateProductSuccessfully() throws Exception {
         // Given
         CreateProductRequest request = new CreateProductRequest(
@@ -87,17 +106,17 @@ class ProductControllerTest {
                 .status(ProductStatus.DRAFT)
                 .build();
 
-        when(createProductUseCase.execute(any(CreateProductRequest.class))).thenReturn(responseDTO);
+        when(createProductUseCase.execute(any())).thenReturn(responseDTO);
 
         // When & Then
         mockMvc.perform(post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.message", is("Product created successfully")))
-                .andExpect(jsonPath("$.data.name", is("Test Product")))
-                .andExpect(jsonPath("$.data.sku", is("TEST-SKU-123")));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Product created successfully"))
+                .andExpect(jsonPath("$.data.name").value("Test Product"))
+                .andExpect(jsonPath("$.data.sku").value("TEST-SKU-123"));
     }
 
     @Test
@@ -209,15 +228,25 @@ class ProductControllerTest {
                 .build();
 
         List<ProductDTO> products = Arrays.asList(product1, product2);
-        when(getProductUseCase.getAllProducts()).thenReturn(products);
+        PaginatedResponse<ProductDTO> paginatedResponse = PaginatedResponse.of(products, 0, 20, 2);
+        
+        when(getProductUseCase.getAllProductsPaged(0, 20, "id", "asc")).thenReturn(paginatedResponse);
 
         // When & Then
-        mockMvc.perform(get("/api/v1/products"))
+        mockMvc.perform(get("/api/v1/products")
+                        .param("page", "0")
+                        .param("size", "20")
+                        .param("sortBy", "id")
+                        .param("sortDir", "asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.data", hasSize(2)))
-                .andExpect(jsonPath("$.data[0].name", is("Product 1")))
-                .andExpect(jsonPath("$.data[1].name", is("Product 2")));
+                .andExpect(jsonPath("$.data.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.content[0].name", is("Product 1")))
+                .andExpect(jsonPath("$.data.content[1].name", is("Product 2")))
+                .andExpect(jsonPath("$.data.totalElements", is(2)))
+                .andExpect(jsonPath("$.data.page", is(0)))
+                .andExpect(jsonPath("$.data.size", is(20)))
+                .andExpect(jsonPath("$.data.totalPages", is(1)));
     }
 
     @Test

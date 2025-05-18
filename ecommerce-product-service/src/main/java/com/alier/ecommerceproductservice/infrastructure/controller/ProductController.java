@@ -83,7 +83,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> getProductById(
             @Parameter(description = "Product ID", required = true)
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         log.info("REST request to get product by ID: {}", id);
         ProductDTO product = getProductUseCase.getById(id);
         return success(product);
@@ -97,7 +97,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> getProductBySku(
             @Parameter(description = "Product SKU", required = true)
-            @PathVariable String sku) {
+            @PathVariable("sku") String sku) {
         log.info("REST request to get product by SKU: {}", sku);
         ProductDTO product = getProductUseCase.getBySku(sku);
         return success(product);
@@ -111,17 +111,17 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<PaginatedResponse<ProductDTO>>> getAllProducts(
             @Parameter(description = "Page number (0-based)", schema = @Schema(defaultValue = "0"))
-            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "0", name = "page") @Min(0) int page,
 
             @Parameter(description = "Page size", schema = @Schema(defaultValue = "20"))
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
+            @RequestParam(defaultValue = "20", name = "size") @Min(1) @Max(100) int size,
 
             @Parameter(description = "Field to sort by", schema = @Schema(defaultValue = "id",
                     allowableValues = {"id", "name", "price", "stockQuantity", "sku", "status", "createdAt", "updatedAt"}))
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "id", name = "sortBy") String sortBy,
 
             @Parameter(description = "Sort direction", schema = @Schema(defaultValue = "asc", allowableValues = {"asc", "desc"}))
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(defaultValue = "asc", name = "sortDir") String sortDir) {
 
         log.info("REST request to get paginated products (page={}, size={})", page, size);
         PaginatedResponse<ProductDTO> products = getProductUseCase.getAllProductsPaged(page, size, sortBy, sortDir);
@@ -224,7 +224,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> updateProduct(
             @Parameter(description = "Product ID", required = true)
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
         log.info("REST request to update product with ID: {}", id);
         ProductDTO updatedProduct = updateProductUseCase.execute(id, request);
@@ -241,7 +241,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> patchProduct(
             @Parameter(description = "Product ID", required = true)
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody ProductPatchRequest request) {
         log.info("REST request to patch product with ID: {}", id);
         ProductDTO patchedProduct = updateProductUseCase.executePatch(id, request);
@@ -271,7 +271,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> activateProduct(
             @Parameter(description = "Product ID", required = true)
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         log.info("REST request to activate product with ID: {}", id);
         ProductDTO activatedProduct = updateProductUseCase.activateProduct(id);
         return success(activatedProduct, "Product activated successfully");
@@ -285,7 +285,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> deactivateProduct(
             @Parameter(description = "Product ID", required = true)
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         log.info("REST request to deactivate product with ID: {}", id);
         ProductDTO deactivatedProduct = updateProductUseCase.deactivateProduct(id);
         return success(deactivatedProduct, "Product deactivated successfully");
@@ -299,7 +299,7 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<PaginatedResponse<ProductDTO>>> getProductsByStatus(
             @Parameter(description = "Product status", required = true)
-            @PathVariable ProductStatus status,
+            @PathVariable("status") ProductStatus status,
 
             @Parameter(description = "Page number (0-based)", schema = @Schema(defaultValue = "0"))
             @RequestParam(defaultValue = "0") @Min(0) int page,
