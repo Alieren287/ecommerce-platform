@@ -132,7 +132,7 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
      * @return A response entity with error details
      */
     @ExceptionHandler(RestBusinessException.class)
-    public ResponseEntity<BaseResponse<Void>> handleBusinessException(RestBusinessException ex) {
+    public ResponseEntity<BaseResponse<Void>> handleRestBusinessException(RestBusinessException ex) {
         log.warn("Rest business rule violation, requestId: {}, traceId: {}, errorCode: {}, message: {}",
                 getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage());
 
