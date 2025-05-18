@@ -1,31 +1,29 @@
-FROM eclipse-temurin:17-jdk-alpine as build
-WORKDIR /workspace/app
+FROM maven:3.8.6-openjdk-17 AS build
+WORKDIR /app
 
-# Copy maven wrapper and pom.xml files
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-# Copy parent pom if exists
-COPY ../pom.xml ../pom.xml
+# Copy the parent POM
+COPY pom.xml /app/pom.xml
 
-# Make the mvnw script executable
-RUN chmod +x ./mvnw
+# Copy the core module
+COPY ecommerce-core /app/ecommerce-core
+COPY ecommerce-web-core /app/ecommerce-web-core
 
-# Download dependencies (this layer will be cached)
-RUN ./mvnw dependency:go-offline -B
+# Copy product service module
+COPY ecommerce-product-service/pom.xml /app/ecommerce-product-service/pom.xml
+COPY ecommerce-product-service/src /app/ecommerce-product-service/src
 
-# Copy source code
-COPY src src
+# Build the project skipping tests
+RUN mvn clean package -DskipTests -pl ecommerce-product-service -am
 
-# Build the application
-RUN ./mvnw package -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+FROM openjdk:17-slim
+WORKDIR /app
 
-# Create a minimal runtime image
-FROM eclipse-temurin:17-jre-alpine
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.alier.ecommerceproductservice.EcommerceProductServiceApplication"] 
+# Copy the jar file from the build stage
+COPY --from=build /app/ecommerce-product-service/target/ecommerce-product-service-*.jar /app/app.jar
+
+# Create volume for logs
+VOLUME /app/logs
+
+EXPOSE 8081
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"] 

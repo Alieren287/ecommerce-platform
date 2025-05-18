@@ -29,25 +29,26 @@
         <java.version>17</java.version>
         <jackson.version>2.16.1</jackson.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <slf4j.version>2.0.12</slf4j.version>
+        <lombok.version>1.18.30</lombok.version>
+        <jakarta.validation.version>3.0.2</jakarta.validation.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <junit.version>5.10.2</junit.version>
+        <mockito.version>5.8.0</mockito.version>
     </properties>
     <dependencies>
-        <!-- Spring Boot - provided scope to avoid direct dependency -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Jakarta Validation API -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.version}</version>
         </dependency>
 
         <!-- jakarta.servlet-api for the logging filter -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -62,6 +63,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -77,12 +79,26 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- Testing -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -108,6 +124,11 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
             </plugin>
         </plugins>
     </build>

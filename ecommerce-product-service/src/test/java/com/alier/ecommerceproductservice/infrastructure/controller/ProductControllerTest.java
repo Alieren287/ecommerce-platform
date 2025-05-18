@@ -9,6 +9,8 @@ import com.alier.ecommerceproductservice.application.usecase.UpdateProductUseCas
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
+import com.alier.ecommerceproductservice.infrastructure.repository.JpaProductRepository;
+import com.alier.ecommerceproductservice.infrastructure.repository.ProductRepositoryAdapter;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +19,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(ProductController.class)
+@Import(ProductRepositoryAdapter.class)
 class ProductControllerTest {
 
     @Autowired
@@ -45,17 +49,20 @@ class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private CreateProductUseCase createProductUseCase;
 
-    @MockBean
+    @MockitoBean
     private GetProductUseCase getProductUseCase;
 
-    @MockBean
+    @MockitoBean
     private UpdateProductUseCase updateProductUseCase;
 
-    @MockBean
+    @MockitoBean
     private ProductSearchService searchService;
+
+    @MockitoBean
+    private JpaProductRepository jpaProductRepository;
 
     @Test
     @DisplayName("Should create product successfully")

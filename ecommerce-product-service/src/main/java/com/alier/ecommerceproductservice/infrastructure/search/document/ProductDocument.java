@@ -38,7 +38,7 @@ public class ProductDocument {
     private String sku;
 
     @Field(type = FieldType.Double)
-    private BigDecimal price;
+    private Double price;
 
     @Field(type = FieldType.Integer)
     private Integer stockQuantity;
@@ -67,7 +67,7 @@ public class ProductDocument {
                 .name(product.getName())
                 .description(product.getDescription())
                 .sku(product.getSku())
-                .price(product.getPrice())
+                .price(product.getPrice().doubleValue())
                 .stockQuantity(product.getStockQuantity())
                 .status(product.getStatus())
                 .imageUrl(product.getImageUrl())
@@ -87,7 +87,7 @@ public class ProductDocument {
                 .name(name)
                 .description(description)
                 .sku(sku)
-                .price(price)
+                .price(price != null ? new BigDecimal(price.toString()) : null)
                 .stockQuantity(stockQuantity)
                 .status(status)
                 .imageUrl(imageUrl)

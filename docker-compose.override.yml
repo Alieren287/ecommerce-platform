@@ -1,0 +1,43 @@
+version: '3'
+services:
+  redis:
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    ports:
+      - "2181:2181"
+
+  kafka:
+    ports:
+      - "9092:9092"
+
+  postgres:
+    ports:
+      - "5432:5432"
+      
+  elasticsearch:
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  ecommerce-product-service:
+    build:
+      context: ./ecommerce-product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+      - kafka
+      - postgres
+      - elasticsearch
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce_products
+      - SPRING_ELASTICSEARCH_URIS=elasticsearch:9200
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:29092
+      - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - ./ecommerce-product-service/logs:/app/logs 
