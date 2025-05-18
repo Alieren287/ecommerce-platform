@@ -5,10 +5,16 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Swagger/OpenAPI configuration.
@@ -29,7 +35,12 @@ public class SwaggerConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
                                         .in(SecurityScheme.In.HEADER)
-                                        .name("Authorization")))
+                                        .name("Authorization"))
+                        .addSchemas("UUID", new Schema<UUID>()
+                                .type("string")
+                                .format("uuid")
+                                .example("123e4567-e89b-12d3-a456-426614174000")
+                                .description("UUID format string")))
                 .info(new Info()
                         .title(applicationName + " API")
                         .description("RESTful API for managing products in the ecommerce platform")
@@ -39,5 +50,22 @@ public class SwaggerConfig {
                                 .email("dev@example.com"))
                         .license(new License()
                                 .name("Private")));
+    }
+    
+    @Bean
+    public OpenApiCustomizer uuidSchemaCustomizer() {
+        return openApi -> {
+            // Add UUID format to all string schemas with format "uuid"
+            for (Map.Entry<String, Schema> entry : openApi.getComponents().getSchemas().entrySet()) {
+                if (entry.getValue().getProperties() != null) {
+                    for (Object propertyObj : entry.getValue().getProperties().values()) {
+                        Schema property = (Schema) propertyObj;
+                        if (property instanceof StringSchema && "uuid".equals(property.getFormat())) {
+                            property.setExample(UUID.randomUUID().toString());
+                        }
+                    }
+                }
+            }
+        };
     }
 } 

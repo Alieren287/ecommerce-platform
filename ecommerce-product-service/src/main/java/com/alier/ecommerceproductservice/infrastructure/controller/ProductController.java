@@ -82,7 +82,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> getProductById(
-            @Parameter(description = "Product ID", required = true)
+            @Parameter(description = "Product ID", required = true, 
+                     schema = @Schema(type = "string", format = "uuid", 
+                     example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to get product by ID: {}", id);
         ProductDTO product = getProductUseCase.getById(id);
@@ -223,7 +225,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> updateProduct(
-            @Parameter(description = "Product ID", required = true)
+            @Parameter(description = "Product ID", required = true,
+                     schema = @Schema(type = "string", format = "uuid",
+                     example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
         log.info("REST request to update product with ID: {}", id);
@@ -240,7 +244,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> patchProduct(
-            @Parameter(description = "Product ID", required = true)
+            @Parameter(description = "Product ID", required = true,
+                     schema = @Schema(type = "string", format = "uuid",
+                     example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id,
             @Valid @RequestBody ProductPatchRequest request) {
         log.info("REST request to patch product with ID: {}", id);
@@ -270,7 +276,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> activateProduct(
-            @Parameter(description = "Product ID", required = true)
+            @Parameter(description = "Product ID", required = true,
+                     schema = @Schema(type = "string", format = "uuid",
+                     example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to activate product with ID: {}", id);
         ProductDTO activatedProduct = updateProductUseCase.activateProduct(id);
@@ -284,7 +292,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> deactivateProduct(
-            @Parameter(description = "Product ID", required = true)
+            @Parameter(description = "Product ID", required = true,
+                     schema = @Schema(type = "string", format = "uuid",
+                     example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to deactivate product with ID: {}", id);
         ProductDTO deactivatedProduct = updateProductUseCase.deactivateProduct(id);

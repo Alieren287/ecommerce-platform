@@ -3,7 +3,6 @@ package com.alier.ecommerceproductservice;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
-import com.alier.ecommerceproductservice.infrastructure.config.ElasticsearchConfig;
 import com.alier.ecommerceproductservice.infrastructure.messaging.ProductEventPublisher;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
 import com.alier.ecommerceproductservice.infrastructure.search.repository.ProductElasticsearchRepository;
@@ -47,14 +46,10 @@ import static org.mockito.Mockito.mock;
         ElasticsearchRestClientAutoConfiguration.class
 })
 // This will override the @EnableElasticsearchRepositories in ElasticsearchConfig
-@EnableElasticsearchRepositories(considerNestedRepositories = true)
+@EnableElasticsearchRepositories(basePackages = {}, considerNestedRepositories = true)
 public class TestConfig {
 
     // ========== Main Config Mocks ==========
-
-    // Mock the main application's config classes to prevent them from creating beans
-    @MockBean
-    private ElasticsearchConfig elasticsearchConfig;
 
     // Mock the Elasticsearch repository
     @MockBean
@@ -129,7 +124,6 @@ public class TestConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo("localhost:9200")
@@ -140,28 +134,24 @@ public class TestConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public RestClient restClient() {
         return mock(RestClient.class);
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
-    public ElasticsearchClient elasticsearchClient() {
+    public ElasticsearchClient elasticsearchClient(ClientConfiguration clientConfiguration) {
         return mock(ElasticsearchClient.class);
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public ElasticsearchOperations elasticsearchOperations() {
         return mock(ElasticsearchOperations.class);
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public ElasticsearchTemplate elasticsearchTemplate() {
         return mock(ElasticsearchTemplate.class);
     }
@@ -174,21 +164,18 @@ public class TestConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public ElasticsearchConverter elasticsearchConverter() {
         return new MappingElasticsearchConverter(new SimpleElasticsearchMappingContext());
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public SimpleElasticsearchMappingContext elasticsearchMappingContext() {
         return new SimpleElasticsearchMappingContext();
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public JacksonJsonpMapper jacksonJsonpMapper() {
         return new JacksonJsonpMapper();
     }
