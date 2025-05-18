@@ -1,5 +1,0 @@
-2025-05-17 23:59:40.545 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Starting EcommerceWebCoreApplicationTests using Java 17.0.13 with PID 21228 (started by alier in C:\ecommerce-platform\ecommerce-web-core)
-2025-05-17 23:59:40.545 [main] DEBUG [] c.a.e.EcommerceWebCoreApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-05-17 23:59:40.545 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - No active profile set, falling back to 1 default profile: "default"
-2025-05-17 23:59:41.531 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
-2025-05-17 23:59:41.563 [main] INFO  [] c.a.e.EcommerceWebCoreApplicationTests - Started EcommerceWebCoreApplicationTests in 1.255 seconds (process running for 1.791)
