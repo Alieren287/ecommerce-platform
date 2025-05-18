@@ -14,7 +14,6 @@ import java.util.UUID;
  * This filter extracts the trace ID and request ID from incoming requests or generates
  * new ones if not present, then places them in both the MDC context for logging and the
  * response headers for propagation.
- * 
  * Note: This filter must be manually registered in your web application configuration.
  */
 @Slf4j
