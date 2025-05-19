@@ -76,7 +76,7 @@ class ProductTest {
 
     @Test
     @DisplayName("Should be able to activate product with stock")
-    void shouldActivateProductWithStock() {
+    void shouldNotActivateProductWithoutImage() {
         // Given
         Product product = Product.create(
                 "Test Product",
@@ -85,11 +85,13 @@ class ProductTest {
                 10,
                 "TEST-SKU-123");
 
-        // When
-        product.activate();
+        // When & Then
+        ProductException exception = assertThrows(ProductException.class, () -> {
+            product.activate();
+        });
 
-        // Then
-        assertEquals(ProductStatus.ACTIVE, product.getStatus());
+        assertEquals(ProductErrorCode.PRODUCT_ACTIVATION_FAILED, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("Cannot activate"));
     }
 
     @Test
