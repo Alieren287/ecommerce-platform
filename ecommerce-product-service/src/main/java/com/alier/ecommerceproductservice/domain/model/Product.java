@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,7 +32,8 @@ public class Product {
 
     private String sku;
 
-    private String imageUrl;
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
 
     private ProductStatus status;
 
@@ -61,6 +64,7 @@ public class Product {
                 .price(price)
                 .stockQuantity(stockQuantity)
                 .sku(sku)
+                .imageUrls(new ArrayList<>())
                 .status(ProductStatus.DRAFT)
                 .createdAt(now)
                 .updatedAt(now)
@@ -110,8 +114,7 @@ public class Product {
             String name,
             String description,
             BigDecimal price,
-            Integer stockQuantity,
-            String imageUrl) {
+            Integer stockQuantity) {
 
         validateName(name);
         validatePrice(price);
@@ -121,7 +124,6 @@ public class Product {
         this.description = description;
         this.price = price;
         this.stockQuantity = stockQuantity;
-        this.imageUrl = imageUrl;
         this.updatedAt = LocalDateTime.now();
 
         return this;
@@ -144,6 +146,10 @@ public class Product {
         if (this.stockQuantity <= 0) {
             throw new ProductException(ProductErrorCode.PRODUCT_ACTIVATION_FAILED,
                     "Cannot activate a product with no stock");
+        }
+        if (this.imageUrls == null || this.imageUrls.isEmpty()) {
+            throw new ProductException(ProductErrorCode.PRODUCT_ACTIVATION_FAILED,
+                    "Cannot activate a product with no images. Please upload at least one image.");
         }
 
         this.status = ProductStatus.ACTIVE;
@@ -193,6 +199,55 @@ public class Product {
         this.stockQuantity += quantity;
         this.updatedAt = LocalDateTime.now();
 
+        return this;
+    }
+
+    /**
+     * Adds an image URL to the product.
+     *
+     * @param imageUrl The URL of the image to add.
+     * @return The updated product.
+     */
+    public Product addImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION, "Image URL cannot be empty.");
+        }
+        if (this.imageUrls == null) {
+            this.imageUrls = new ArrayList<>();
+        }
+        if (!this.imageUrls.contains(imageUrl)) {
+            this.imageUrls.add(imageUrl);
+            this.updatedAt = LocalDateTime.now();
+        }
+        return this;
+    }
+
+    /**
+     * Removes an image URL from the product.
+     *
+     * @param imageUrl The URL of the image to remove.
+     * @return The updated product.
+     */
+    public Product removeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION, "Image URL cannot be empty for removal.");
+        }
+        if (this.imageUrls != null && this.imageUrls.remove(imageUrl)) {
+            this.updatedAt = LocalDateTime.now();
+        }
+        return this;
+    }
+
+    /**
+     * Clears all image URLs from the product.
+     *
+     * @return The updated product.
+     */
+    public Product clearImageUrls() {
+        if (this.imageUrls != null && !this.imageUrls.isEmpty()) {
+            this.imageUrls.clear();
+            this.updatedAt = LocalDateTime.now();
+        }
         return this;
     }
 } 

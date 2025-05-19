@@ -54,23 +54,7 @@ public class CreateProductUseCase extends UseCaseHandler<CreateProductRequest, P
     protected ProductDTO handle(CreateProductRequest request) {
         log.info("Creating new product with SKU: {}", request.getSku());
 
-        Product product = Product.create(
-                request.getName(),
-                request.getDescription(),
-                request.getPrice(),
-                request.getStockQuantity(),
-                request.getSku()
-        );
-
-        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
-            product = product.update(
-                    product.getName(),
-                    product.getDescription(),
-                    product.getPrice(),
-                    product.getStockQuantity(),
-                    request.getImageUrl()
-            );
-        }
+        Product product = createProductFromRequest(request);
 
         Product savedProduct = productRepository.save(product);
         log.info("Product created successfully with ID: {}", savedProduct.getId());
@@ -151,14 +135,10 @@ public class CreateProductUseCase extends UseCaseHandler<CreateProductRequest, P
                 request.getSku()
         );
 
-        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
-            product = product.update(
-                    product.getName(),
-                    product.getDescription(),
-                    product.getPrice(),
-                    product.getStockQuantity(),
-                    request.getImageUrl()
-            );
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            for (String imageUrl : request.getImageUrls()) {
+                product.addImageUrl(imageUrl);
+            }
         }
 
         return product;

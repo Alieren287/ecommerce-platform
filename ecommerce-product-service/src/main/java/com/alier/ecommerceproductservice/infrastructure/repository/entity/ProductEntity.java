@@ -7,6 +7,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -40,8 +42,15 @@ public class ProductEntity {
     @Column(name = "sku", nullable = false, unique = true)
     private String sku;
 
+    // Using ElementCollection for a simple one-to-many relationship with basic types
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "product_image_urls",
+            joinColumns = @JoinColumn(name = "product_id")
+    )
     @Column(name = "image_url")
-    private String imageUrl;
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -57,35 +66,49 @@ public class ProductEntity {
      * Creates a JPA entity from a domain entity
      */
     public static ProductEntity fromDomain(Product product) {
-        return ProductEntity.builder()
+        ProductEntity entity = ProductEntity.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .sku(product.getSku())
-                .imageUrl(product.getImageUrl())
                 .status(product.getStatus())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+
+        // Set image URLs
+        if (product.getImageUrls() != null) {
+            entity.setImageUrls(new ArrayList<>(product.getImageUrls()));
+        }
+
+        return entity;
     }
 
     /**
      * Converts this JPA entity to a domain entity
      */
     public Product toDomain() {
-        return Product.builder()
+        Product product = Product.builder()
                 .id(id)
                 .name(name)
                 .description(description)
                 .price(price)
                 .stockQuantity(stockQuantity)
                 .sku(sku)
-                .imageUrl(imageUrl)
                 .status(status)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
+
+        // Add image URLs if any exist
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            for (String url : imageUrls) {
+                product.addImageUrl(url);
+            }
+        }
+
+        return product;
     }
 } 

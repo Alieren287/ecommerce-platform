@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Request object for creating a new product.
@@ -36,5 +37,5 @@ public class CreateProductRequest {
     @Size(min = 3, max = 50, message = "SKU must be between 3 and 50 characters")
     private String sku;
 
-    private String imageUrl;
+    private List<String> imageUrls;
 } 

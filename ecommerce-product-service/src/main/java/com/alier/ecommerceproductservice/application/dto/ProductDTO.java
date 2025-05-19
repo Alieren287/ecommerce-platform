@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -27,7 +28,7 @@ public class ProductDTO {
     private BigDecimal price;
     private Integer stockQuantity;
     private String sku;
-    private String imageUrl;
+    private List<String> imageUrls;
     private ProductStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -43,7 +44,7 @@ public class ProductDTO {
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .sku(product.getSku())
-                .imageUrl(product.getImageUrl())
+                .imageUrls(product.getImageUrls())
                 .status(product.getStatus())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

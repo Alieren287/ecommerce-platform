@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -46,8 +47,8 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     private ProductStatus status;
 
-    @Field(type = FieldType.Text)
-    private String imageUrl;
+    @Field(type = FieldType.Keyword)
+    private List<String> imageUrls;
 
     @Field(type = FieldType.Date)
     private LocalDateTime createdAt;
@@ -70,7 +71,7 @@ public class ProductDocument {
                 .price(product.getPrice().doubleValue())
                 .stockQuantity(product.getStockQuantity())
                 .status(product.getStatus())
-                .imageUrl(product.getImageUrl())
+                .imageUrls(product.getImageUrls())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
@@ -82,7 +83,7 @@ public class ProductDocument {
      * @return Domain model
      */
     public Product toDomain() {
-        return Product.builder()
+        Product product = Product.builder()
                 .id(UUID.fromString(id))
                 .name(name)
                 .description(description)
@@ -90,9 +91,17 @@ public class ProductDocument {
                 .price(price != null ? new BigDecimal(price.toString()) : null)
                 .stockQuantity(stockQuantity)
                 .status(status)
-                .imageUrl(imageUrl)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
+
+        // Add image URLs if any exist
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            for (String url : imageUrls) {
+                product.addImageUrl(url);
+            }
+        }
+
+        return product;
     }
 } 

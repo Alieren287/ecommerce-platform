@@ -51,36 +51,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({ProductRepositoryAdapter.class, ProductController.class, GlobalRestExceptionHandler.class})
 class ProductControllerTest {
 
-    @Configuration
-    @EnableWebSecurity
-    static class TestSecurityConfig {
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-            return http.build();
-        }
-    }
-
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @MockitoBean
     private CreateProductUseCase createProductUseCase;
-
     @MockitoBean
     private GetProductUseCase getProductUseCase;
-
     @MockitoBean
     private UpdateProductUseCase updateProductUseCase;
-
     @MockitoBean
     private ProductSearchService searchService;
-
     @MockitoBean
     private ProductRepository productRepository; // ✅ Needed for controller injection
 
@@ -93,7 +75,7 @@ class ProductControllerTest {
                 new BigDecimal("99.99"),
                 10,
                 "TEST-SKU-123",
-                "test"
+                List.of("test")
         );
 
         ProductDTO responseDTO = ProductDTO.builder()
@@ -129,7 +111,7 @@ class ProductControllerTest {
                 new BigDecimal("99.99"),
                 10,
                 "DUPLICATE-SKU",
-                "test"
+                List.of("test")
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
@@ -154,7 +136,7 @@ class ProductControllerTest {
                 new BigDecimal("99.99"),
                 10,
                 "TEST-SKU-123",
-                "test"
+                List.of("test")
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
@@ -229,7 +211,7 @@ class ProductControllerTest {
 
         List<ProductDTO> products = Arrays.asList(product1, product2);
         PaginatedResponse<ProductDTO> paginatedResponse = PaginatedResponse.of(products, 0, 20, 2);
-        
+
         when(getProductUseCase.getAllProductsPaged(0, 20, "id", "asc")).thenReturn(paginatedResponse);
 
         // When & Then
@@ -258,8 +240,7 @@ class ProductControllerTest {
                 "Updated Product",
                 "Updated Description",
                 new BigDecimal("149.99"),
-                20,
-                "http://example.com/image.jpg"
+                20
         );
 
         ProductDTO responseDTO = ProductDTO.builder()
@@ -268,7 +249,7 @@ class ProductControllerTest {
                 .description("Updated Description")
                 .price(new BigDecimal("149.99"))
                 .stockQuantity(20)
-                .imageUrl("http://example.com/image.jpg")
+                .imageUrls(List.of("http://example.com/image.jpg"))
                 .status(ProductStatus.ACTIVE)
                 .build();
 
@@ -295,8 +276,7 @@ class ProductControllerTest {
                 "Updated Product",
                 "Updated Description",
                 new BigDecimal("149.99"),
-                20,
-                "http://example.com/image.jpg"
+                20
         );
 
         when(updateProductUseCase.execute(Mockito.eq(productId), any(UpdateProductRequest.class)))
@@ -309,5 +289,17 @@ class ProductControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.message", is("Product not found with id: " + productId)));
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            return http.build();
+        }
     }
 } 

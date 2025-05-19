@@ -133,6 +133,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public long count() {
+        return jpaRepository.count();
+    }
+
+    @Override
     public List<Product> findById(List<UUID> productIds) {
         if (productIds == null || productIds.isEmpty()) {
             return List.of();
