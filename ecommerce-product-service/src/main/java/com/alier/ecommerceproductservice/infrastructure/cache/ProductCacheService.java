@@ -22,7 +22,7 @@ public class ProductCacheService {
     private static final String PRODUCT_BY_SKU_CACHE_KEY_PREFIX = "product:sku:";
     private static final long CACHE_TTL_HOURS = 24;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, ProductDTO> redisTemplate;
 
     /**
      * Caches a product DTO.
@@ -52,7 +52,7 @@ public class ProductCacheService {
     public Optional<ProductDTO> getProductById(UUID id) {
         try {
             String key = PRODUCT_CACHE_KEY_PREFIX + id;
-            ProductDTO cachedProduct = (ProductDTO) redisTemplate.opsForValue().get(key);
+            ProductDTO cachedProduct = redisTemplate.opsForValue().get(key);
 
             if (cachedProduct != null) {
                 log.debug("Cache hit for product ID: {}", id);
@@ -76,7 +76,7 @@ public class ProductCacheService {
     public Optional<ProductDTO> getProductBySku(String sku) {
         try {
             String key = PRODUCT_BY_SKU_CACHE_KEY_PREFIX + sku;
-            ProductDTO cachedProduct = (ProductDTO) redisTemplate.opsForValue().get(key);
+            ProductDTO cachedProduct = redisTemplate.opsForValue().get(key);
 
             if (cachedProduct != null) {
                 log.debug("Cache hit for product SKU: {}", sku);
@@ -100,13 +100,11 @@ public class ProductCacheService {
         try {
             // First get the product to find its SKU
             String idKey = PRODUCT_CACHE_KEY_PREFIX + id;
-            ProductDTO cachedProduct = (ProductDTO) redisTemplate.opsForValue().get(idKey);
-
-            // Delete by ID
+            ProductDTO cachedProduct = redisTemplate.opsForValue().get(idKey);
             redisTemplate.delete(idKey);
-
             // If found in cache, also delete by SKU
             if (cachedProduct != null) {
+                // Delete by ID
                 String skuKey = PRODUCT_BY_SKU_CACHE_KEY_PREFIX + cachedProduct.getSku();
                 redisTemplate.delete(skuKey);
                 log.debug("Evicted product with ID: {}, SKU: {} from cache", id, cachedProduct.getSku());

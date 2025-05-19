@@ -1,5 +1,7 @@
 package com.alier.ecommerceproductservice.infrastructure.messaging;
 
+import com.alier.ecommercecore.common.logging.CorrelationContext;
+import com.alier.ecommercecore.common.messaging.MessageCorrelationAdapter;
 import com.alier.ecommerceproductservice.domain.event.ProductCreatedEvent;
 import com.alier.ecommerceproductservice.domain.event.ProductStatusChangedEvent;
 import com.alier.ecommerceproductservice.domain.event.ProductUpdatedEvent;
@@ -10,12 +12,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 /**
  * Service for publishing product domain events to Kafka topics.
+ * This implementation preserves trace and correlation IDs across service boundaries.
  */
 @Service
 @RequiredArgsConstructor
@@ -40,17 +46,9 @@ public class ProductEventPublisher {
             String key = event.getId().toString();
 
             log.info("Publishing ProductCreatedEvent to topic {} with key {}", productCreatedTopic, key);
-            kafkaTemplate.send(productCreatedTopic, key, eventJson)
-                    .whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            log.info("ProductCreatedEvent sent successfully to topic: {}, partition: {}, offset: {}",
-                                    result.getRecordMetadata().topic(),
-                                    result.getRecordMetadata().partition(),
-                                    result.getRecordMetadata().offset());
-                        } else {
-                            log.error("Failed to send ProductCreatedEvent to Kafka: {}", ex.getMessage(), ex);
-                        }
-                    });
+
+            // Use the correlation adapter to prepare outgoing message headers
+            sendEventWithCorrelationHeaders(productCreatedTopic, key, eventJson, "ProductCreatedEvent");
         } catch (JsonProcessingException e) {
             log.error("Error serializing ProductCreatedEvent to JSON: {}", e.getMessage(), e);
         } catch (Exception e) {
@@ -79,17 +77,9 @@ public class ProductEventPublisher {
             String key = event.getId().toString();
 
             log.info("Publishing ProductUpdatedEvent to topic {} with key {}", productUpdatedTopic, key);
-            kafkaTemplate.send(productUpdatedTopic, key, eventJson)
-                    .whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            log.info("ProductUpdatedEvent sent successfully to topic: {}, partition: {}, offset: {}",
-                                    result.getRecordMetadata().topic(),
-                                    result.getRecordMetadata().partition(),
-                                    result.getRecordMetadata().offset());
-                        } else {
-                            log.error("Failed to send ProductUpdatedEvent to Kafka: {}", ex.getMessage(), ex);
-                        }
-                    });
+
+            // Use the correlation adapter to prepare outgoing message headers
+            sendEventWithCorrelationHeaders(productUpdatedTopic, key, eventJson, "ProductUpdatedEvent");
         } catch (JsonProcessingException e) {
             log.error("Error serializing ProductUpdatedEvent to JSON: {}", e.getMessage(), e);
         } catch (Exception e) {
@@ -127,18 +117,50 @@ public class ProductEventPublisher {
             String key = product.getId().toString();
 
             log.info("Publishing ProductStatusChangedEvent to topic {} with key {}", productUpdatedTopic, key);
-            kafkaTemplate.send(productUpdatedTopic, key, eventJson)
-                    .whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            log.info("ProductStatusChangedEvent sent successfully");
-                        } else {
-                            log.error("Failed to send ProductStatusChangedEvent to Kafka: {}", ex.getMessage(), ex);
-                        }
-                    });
+
+            // Use the correlation adapter to prepare outgoing message headers
+            sendEventWithCorrelationHeaders(productUpdatedTopic, key, eventJson, "ProductStatusChangedEvent");
         } catch (JsonProcessingException e) {
             log.error("Error serializing ProductStatusChangedEvent to JSON: {}", e.getMessage(), e);
         } catch (Exception e) {
             log.error("Error publishing ProductStatusChangedEvent: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     * Helper method to send an event with correlation headers.
+     * This ensures correlation IDs are propagated to downstream services.
+     *
+     * @param topic     The Kafka topic to publish to
+     * @param key       The message key
+     * @param payload   The JSON payload
+     * @param eventType The type of event (for logging)
+     */
+    private void sendEventWithCorrelationHeaders(String topic, String key, String payload, String eventType) {
+        // Create a message builder with payload and key
+        MessageBuilder<String> messageBuilder = MessageBuilder
+                .withPayload(payload)
+                .setHeader(KafkaHeaders.TOPIC, topic)
+                .setHeader(KafkaHeaders.KEY, key);
+
+        // Use our MessageCorrelationAdapter to add trace and correlation headers
+        MessageCorrelationAdapter.prepareOutgoingMessageHeaders(messageBuilder::setHeader);
+
+        // Build and send the message
+        Message<String> message = messageBuilder.build();
+        kafkaTemplate.send(message)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.info("{} sent successfully to topic: {}, partition: {}, offset: {}, traceId: {}",
+                                eventType,
+                                result.getRecordMetadata().topic(),
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset(),
+                                CorrelationContext.getTraceId());
+                    } else {
+                        log.error("Failed to send {} to Kafka: {}, traceId: {}",
+                                eventType, ex.getMessage(), CorrelationContext.getTraceId(), ex);
+                    }
+                });
     }
 } 

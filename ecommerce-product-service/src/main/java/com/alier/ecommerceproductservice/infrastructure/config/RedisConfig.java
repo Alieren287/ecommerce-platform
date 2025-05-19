@@ -1,8 +1,6 @@
 package com.alier.ecommerceproductservice.infrastructure.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,34 +24,24 @@ public class RedisConfig {
     private int redisPort;
 
     @Bean
-    public ObjectMapper redisObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return objectMapper;
-    }
-
-    @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
         return new LettuceConnectionFactory(config);
     }
 
     @Bean
-    public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer(ObjectMapper redisObjectMapper) {
-        return new GenericJackson2JsonRedisSerializer(redisObjectMapper);
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory,
-                                                       GenericJackson2JsonRedisSerializer jsonRedisSerializer) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, ProductDTO> redisTemplate(RedisConnectionFactory connectionFactory,
+                                                           GenericJackson2JsonRedisSerializer customRedisSerializer) {
+        RedisTemplate<String, ProductDTO> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
+
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(jsonRedisSerializer);
+        template.setValueSerializer(customRedisSerializer);
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(jsonRedisSerializer);
+        template.setHashValueSerializer(customRedisSerializer);
+
         template.afterPropertiesSet();
         return template;
     }
+
 } 

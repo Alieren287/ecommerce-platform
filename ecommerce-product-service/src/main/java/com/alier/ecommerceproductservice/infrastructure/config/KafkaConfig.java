@@ -1,21 +1,23 @@
 package com.alier.ecommerceproductservice.infrastructure.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Kafka configuration for event publishing.
+ * Kafka configuration for event publishing and consuming.
+ * This configuration ensures headers are properly propagated for tracing.
  */
 @Configuration
 public class KafkaConfig {
@@ -28,6 +30,9 @@ public class KafkaConfig {
 
     @Value("${kafka.topic.product-updated}")
     private String productUpdatedTopic;
+    
+    @Value("${kafka.consumer.group-id:product-service-consumer}")
+    private String consumerGroupId;
 
     @Value("${kafka.topic.partitions:3}")
     private int partitions;
@@ -35,6 +40,9 @@ public class KafkaConfig {
     @Value("${kafka.topic.replication-factor:1}")
     private short replicationFactor;
 
+    /**
+     * Producer configuration for publishing events.
+     */
     @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
@@ -58,6 +66,38 @@ public class KafkaConfig {
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+    
+    /**
+     * Consumer configuration for receiving events.
+     */
+    @Bean
+    public Map<String, Object> consumerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        return props;
+    }
+
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs());
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = 
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        // Configure concurrency
+        factory.setConcurrency(3);
+        // Configure batch mode if needed
+        //factory.setBatchListener(true);
+        return factory;
     }
 
     // Topics configuration

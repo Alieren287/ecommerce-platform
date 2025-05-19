@@ -2,6 +2,7 @@ package com.alier.ecommerceproductservice.infrastructure.controller;
 
 import com.alier.ecommercecore.common.dto.BaseResponse;
 import com.alier.ecommercecore.common.dto.PaginatedResponse;
+import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommerceproductservice.application.dto.*;
 import com.alier.ecommerceproductservice.application.usecase.CreateProductUseCase;
 import com.alier.ecommerceproductservice.application.usecase.GetProductUseCase;
@@ -11,6 +12,7 @@ import com.alier.ecommerceproductservice.domain.model.ProductStatus;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
 import com.alier.ecommercewebcore.rest.controller.BaseController;
+import com.alier.ecommercewebcore.rest.exception.GlobalErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -358,11 +360,11 @@ public class ProductController extends BaseController {
 
         // Validate price range
         if (minPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Minimum price cannot be negative");
+            throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Minimum price cannot be negative");
         }
 
         if (maxPrice.compareTo(minPrice) < 0) {
-            throw new IllegalArgumentException("Maximum price cannot be less than minimum price");
+            throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Maximum price cannot be less than minimum price");
         }
 
         PaginatedResponse<ProductDTO> products = getProductUseCase.getProductsByPriceRange(minPrice, maxPrice, page, size, sortBy, sortDir);

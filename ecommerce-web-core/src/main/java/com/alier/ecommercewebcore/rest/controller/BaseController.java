@@ -2,7 +2,8 @@ package com.alier.ecommercewebcore.rest.controller;
 
 import com.alier.ecommercecore.common.dto.BaseResponse;
 import com.alier.ecommercecore.common.dto.PaginatedResponse;
-import com.alier.ecommercecore.common.logging.LoggingConstants;
+import com.alier.ecommercecore.common.logging.CorrelationContext;
+import com.alier.ecommercecore.common.logging.CorrelationIds;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,35 +19,21 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public abstract class BaseController {
 
     /**
-     * Gets the current request ID from the request attributes.
-     * This ID is set by the LoggingContextFilter.
+     * Gets the current request ID from the correlation context.
      *
      * @return The current request ID
      */
     protected String getRequestId() {
-        HttpServletRequest request = getCurrentRequest();
-        if (request == null) {
-            return null;
-        }
-
-        Object requestId = request.getAttribute(LoggingConstants.REQUEST_ID_MDC_KEY);
-        return requestId != null ? requestId.toString() : null;
+        return CorrelationContext.get(CorrelationIds.REQUEST_ID);
     }
 
     /**
-     * Gets the current trace ID from the request attributes.
-     * This ID is set by the LoggingContextFilter.
+     * Gets the current trace ID from the correlation context.
      *
      * @return The current trace ID
      */
     protected String getTraceId() {
-        HttpServletRequest request = getCurrentRequest();
-        if (request == null) {
-            return null;
-        }
-
-        Object traceId = request.getAttribute(LoggingConstants.TRACE_ID_MDC_KEY);
-        return traceId != null ? traceId.toString() : null;
+        return CorrelationContext.get(CorrelationIds.TRACE_ID);
     }
 
     /**

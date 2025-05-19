@@ -1,5 +1,8 @@
 package com.alier.ecommerceproductservice.infrastructure.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,26 +22,33 @@ import java.time.Duration;
 public class CacheConfig {
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, 
-                                     GenericJackson2JsonRedisSerializer jsonRedisSerializer) {
-        RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1)) // Cache entries expire after 1 hour
+    public GenericJackson2JsonRedisSerializer customRedisSerializer() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new GenericJackson2JsonRedisSerializer(objectMapper);
+    }
+
+    @Bean
+    public CacheManager cacheManager(
+            RedisConnectionFactory redisConnectionFactory,
+            GenericJackson2JsonRedisSerializer customRedisSerializer) {
+
+        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1))
                 .disableCachingNullValues()
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(jsonRedisSerializer));
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(customRedisSerializer));
+
+        RedisCacheConfiguration productCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(30))
+                .disableCachingNullValues()
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(customRedisSerializer));
 
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfiguration)
-                .withCacheConfiguration("products",
-                        RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(30)) // Products cache expires after 30 minutes
-                                .disableCachingNullValues()
-                                .serializeKeysWith(
-                                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                                .serializeValuesWith(
-                                        RedisSerializationContext.SerializationPair.fromSerializer(jsonRedisSerializer)))
+                .cacheDefaults(defaultCacheConfig)
+                .withCacheConfiguration("products", productCacheConfig)
                 .build();
     }
-} 
+}

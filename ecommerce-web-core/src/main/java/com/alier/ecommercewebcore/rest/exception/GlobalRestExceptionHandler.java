@@ -2,7 +2,8 @@ package com.alier.ecommercewebcore.rest.exception;
 
 import com.alier.ecommercecore.common.dto.BaseResponse;
 import com.alier.ecommercecore.common.exception.BusinessException;
-import com.alier.ecommercecore.common.logging.LoggingConstants;
+import com.alier.ecommercecore.common.logging.CorrelationContext;
+import com.alier.ecommercecore.common.logging.CorrelationIds;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.NonNull;
@@ -33,35 +34,21 @@ import java.util.stream.Collectors;
 public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
-     * Gets the current request ID from the request attributes.
-     * This ID is set by the LoggingContextFilter.
+     * Gets the current request ID from the correlation context.
      *
      * @return The current request ID
      */
     protected String getRequestId() {
-        HttpServletRequest request = getCurrentRequest();
-        if (request == null) {
-            return null;
-        }
-
-        Object requestId = request.getAttribute(LoggingConstants.REQUEST_ID_MDC_KEY);
-        return requestId != null ? requestId.toString() : null;
+        return CorrelationContext.get(CorrelationIds.REQUEST_ID);
     }
 
     /**
-     * Gets the current trace ID from the request attributes.
-     * This ID is set by the LoggingContextFilter.
+     * Gets the current trace ID from the correlation context.
      *
      * @return The current trace ID
      */
     protected String getTraceId() {
-        HttpServletRequest request = getCurrentRequest();
-        if (request == null) {
-            return null;
-        }
-
-        Object traceId = request.getAttribute(LoggingConstants.TRACE_ID_MDC_KEY);
-        return traceId != null ? traceId.toString() : null;
+        return CorrelationContext.get(CorrelationIds.TRACE_ID);
     }
 
     /**
@@ -172,12 +159,22 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
                         (error1, error2) -> error1 + ", " + error2
                 ));
 
-        String requestId = null;
-        String traceId = null;
-        if (webRequest instanceof ServletWebRequest) {
-            HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
-            requestId = (String) request.getAttribute(LoggingConstants.REQUEST_ID_MDC_KEY);
-            traceId = (String) request.getAttribute(LoggingConstants.TRACE_ID_MDC_KEY);
+        String requestId = getRequestId();
+        String traceId = getTraceId();
+        
+        // If for some reason we couldn't get IDs from context, try to get from the WebRequest
+        if (requestId == null || traceId == null) {
+            if (webRequest instanceof ServletWebRequest) {
+                HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
+                if (requestId == null) {
+                    Object reqId = request.getAttribute(CorrelationIds.REQUEST_ID);
+                    if (reqId != null) requestId = reqId.toString();
+                }
+                if (traceId == null) {
+                    Object trcId = request.getAttribute(CorrelationIds.TRACE_ID);
+                    if (trcId != null) traceId = trcId.toString();
+                }
+            }
         }
 
         log.warn("Method argument validation failed, requestId: {}, traceId: {}, errors: {}",
