@@ -14,7 +14,6 @@ import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
 import com.alier.ecommerceproductservice.infrastructure.messaging.ProductEventPublisher;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -73,76 +72,80 @@ public class UpdateProductUseCase {
                     return new ProductException.ProductNotFoundException(id);
                 });
 
+        boolean updated = false;
         // Apply patch selectively based on non-null fields
         if (request.getName() != null) {
-            product = product.update(
+            product.update(
                     request.getName(),
                     product.getDescription(),
                     product.getPrice(),
-                    product.getStockQuantity(),
-                    product.getImageUrl()
+                    product.getStockQuantity()
             );
+            updated = true;
         }
 
         if (request.getDescription() != null) {
-            product = product.update(
+            product.update(
                     product.getName(),
                     request.getDescription(),
                     product.getPrice(),
-                    product.getStockQuantity(),
-                    product.getImageUrl()
+                    product.getStockQuantity()
             );
+            updated = true;
         }
 
         if (request.getPrice() != null) {
-            product = product.update(
+            product.update(
                     product.getName(),
                     product.getDescription(),
                     request.getPrice(),
-                    product.getStockQuantity(),
-                    product.getImageUrl()
+                    product.getStockQuantity()
             );
+            updated = true;
         }
 
         if (request.getStockQuantity() != null) {
-            product = product.update(
+            product.update(
                     product.getName(),
                     product.getDescription(),
                     product.getPrice(),
-                    request.getStockQuantity(),
-                    product.getImageUrl()
+                    request.getStockQuantity()
             );
-        }
-
-        if (request.getImageUrl() != null) {
-            product = product.update(
-                    product.getName(),
-                    product.getDescription(),
-                    product.getPrice(),
-                    product.getStockQuantity(),
-                    request.getImageUrl()
-            );
+            updated = true;
         }
 
         if (request.getStatus() != null) {
             switch (request.getStatus()) {
-                case ACTIVE -> product = product.activate();
-                case INACTIVE -> product = product.deactivate();
-                case DRAFT -> log.warn("Cannot change product status back to DRAFT");
+                case ACTIVE -> product.activate();
+                case INACTIVE -> product.deactivate();
+                case DRAFT ->
+                        log.warn("Cannot change product status back to DRAFT for product ID: {}. Status remains {}.", id, product.getStatus());
+                // No default needed as ProductStatus is an enum
             }
+            updated = true;
         }
 
-        Product updatedProduct = productRepository.save(product);
+        Product savedProduct;
+        if (updated) {
+            savedProduct = productRepository.save(product);
+        } else {
+            savedProduct = product; // No changes made, return original
+        }
+
 
         // Update cache and search index
-        ProductDTO productDTO = ProductDTO.fromDomain(updatedProduct);
+        ProductDTO productDTO = ProductDTO.fromDomain(savedProduct);
         cacheService.cacheProduct(productDTO);
-        searchService.indexProduct(updatedProduct);
+        searchService.indexProduct(savedProduct);
 
-        // Publish event
-        eventPublisher.publishProductUpdatedEvent(updatedProduct);
+        // Publish event only if there was an actual update
+        if (updated) {
+            eventPublisher.publishProductUpdatedEvent(savedProduct);
+            log.info("Product {} patched successfully", id);
+        } else {
+            log.info("Product {} patch request received, but no changes were applied.", id);
+        }
 
-        log.info("Product {} patched successfully", id);
 
         return productDTO;
     }
@@ -199,8 +202,8 @@ public class UpdateProductUseCase {
                     updateRequest.getName(),
                     updateRequest.getDescription(),
                     updateRequest.getPrice(),
-                    updateRequest.getStockQuantity(),
-                    updateRequest.getImageUrl()
+                    updateRequest.getStockQuantity()
+                    // updateRequest.getImageUrl() removed
             );
 
             productsToUpdate.add(product);
@@ -292,10 +295,7 @@ public class UpdateProductUseCase {
     /**
      * Input data for the update product use case handler.
      */
-    @Data
-    public class UpdateProductInput {
-        private final UUID id;
-        private final UpdateProductRequest request;
+    public record UpdateProductInput(UUID id, UpdateProductRequest request) {
     }
 
     /**
@@ -305,22 +305,22 @@ public class UpdateProductUseCase {
 
         @Override
         protected ProductDTO handle(UpdateProductInput input) throws BusinessException {
-            log.debug("Updating product with ID: {}", input.getId());
+            log.debug("Updating product with ID: {}", input.id());
 
-            Product product = productRepository.findById(input.getId())
+            Product product = productRepository.findById(input.id())
                     .orElseThrow(() -> {
-                        log.warn("Product not found with ID: {}", input.getId());
-                        return new ProductException.ProductNotFoundException(input.getId());
+                        log.warn("Product not found with ID: {}", input.id());
+                        return new ProductException.ProductNotFoundException(input.id());
                     });
 
-            UpdateProductRequest request = input.getRequest();
+            UpdateProductRequest request = input.request();
 
             Product updatedProduct = product.update(
                     request.getName(),
                     request.getDescription(),
                     request.getPrice(),
-                    request.getStockQuantity(),
-                    request.getImageUrl()
+                    request.getStockQuantity()
+                    // request.getImageUrl() removed
             );
 
             Product savedProduct = productRepository.save(updatedProduct);
@@ -333,7 +333,7 @@ public class UpdateProductUseCase {
             // Publish event
             eventPublisher.publishProductUpdatedEvent(savedProduct);
 
-            log.info("Product {} updated successfully", input.getId());
+            log.info("Product {} updated successfully", input.id());
 
             return productDTO;
         }

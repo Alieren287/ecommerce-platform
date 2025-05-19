@@ -132,4 +132,11 @@ public interface ProductRepository {
      * @return list of products matching the IDs
      */
     List<Product> findById(List<UUID> productIds);
+
+    /**
+     * Get current count of products
+     *
+     * @return product count
+     */
+    long count();
 } 

@@ -40,7 +40,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-@Tag(name = "Products", description = "Product management APIs")
+@Tag(name = "Products", description = "Product management APIs (excluding images)")
 public class ProductController extends BaseController {
 
     private final CreateProductUseCase createProductUseCase;
@@ -84,9 +84,9 @@ public class ProductController extends BaseController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public ResponseEntity<BaseResponse<ProductDTO>> getProductById(
-            @Parameter(description = "Product ID", required = true, 
-                     schema = @Schema(type = "string", format = "uuid", 
-                     example = "123e4567-e89b-12d3-a456-426614174000"))
+            @Parameter(description = "Product ID", required = true,
+                    schema = @Schema(type = "string", format = "uuid",
+                            example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to get product by ID: {}", id);
         ProductDTO product = getProductUseCase.getById(id);
@@ -228,8 +228,8 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> updateProduct(
             @Parameter(description = "Product ID", required = true,
-                     schema = @Schema(type = "string", format = "uuid",
-                     example = "123e4567-e89b-12d3-a456-426614174000"))
+                    schema = @Schema(type = "string", format = "uuid",
+                            example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
         log.info("REST request to update product with ID: {}", id);
@@ -247,8 +247,8 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> patchProduct(
             @Parameter(description = "Product ID", required = true,
-                     schema = @Schema(type = "string", format = "uuid",
-                     example = "123e4567-e89b-12d3-a456-426614174000"))
+                    schema = @Schema(type = "string", format = "uuid",
+                            example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id,
             @Valid @RequestBody ProductPatchRequest request) {
         log.info("REST request to patch product with ID: {}", id);
@@ -279,8 +279,8 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> activateProduct(
             @Parameter(description = "Product ID", required = true,
-                     schema = @Schema(type = "string", format = "uuid",
-                     example = "123e4567-e89b-12d3-a456-426614174000"))
+                    schema = @Schema(type = "string", format = "uuid",
+                            example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to activate product with ID: {}", id);
         ProductDTO activatedProduct = updateProductUseCase.activateProduct(id);
@@ -295,8 +295,8 @@ public class ProductController extends BaseController {
     })
     public ResponseEntity<BaseResponse<ProductDTO>> deactivateProduct(
             @Parameter(description = "Product ID", required = true,
-                     schema = @Schema(type = "string", format = "uuid",
-                     example = "123e4567-e89b-12d3-a456-426614174000"))
+                    schema = @Schema(type = "string", format = "uuid",
+                            example = "123e4567-e89b-12d3-a456-426614174000"))
             @PathVariable("id") UUID id) {
         log.info("REST request to deactivate product with ID: {}", id);
         ProductDTO deactivatedProduct = updateProductUseCase.deactivateProduct(id);
@@ -479,15 +479,47 @@ public class ProductController extends BaseController {
 
     @PostMapping("/elasticsearch/reindex")
     @Operation(summary = "Reindex all products",
-            description = "Rebuilds the Elasticsearch index with current data (admin only)")
+            description = "Rebuilds the Elasticsearch index with current data from the primary database (admin only). This can be a long-running operation.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reindexing completed"),
-            @ApiResponse(responseCode = "403", description = "Not authorized")
+            @ApiResponse(responseCode = "200", description = "Reindexing initiated successfully"),
+            @ApiResponse(responseCode = "403", description = "Not authorized (requires ADMIN role - to be implemented)"),
+            @ApiResponse(responseCode = "500", description = "Reindexing failed")
     })
+    // TODO: Add @PreAuthorize("hasRole('ADMIN')") or similar security constraint
     public ResponseEntity<BaseResponse<Void>> reindexProducts() {
         log.info("REST request to reindex all products in Elasticsearch");
-        List<Product> allProducts = productRepository.findAll();
-        searchService.reindexAll(allProducts);
-        return success(null, "Reindexing completed successfully");
+        try {
+            long count = productRepository.count(); // This should work as JpaRepository provides count()
+            if (count == 0) {
+                log.info("No products found in the database to reindex.");
+                return success(null, "No products to reindex.");
+            }
+
+            log.info("Fetching {} products from database for reindexing...", count);
+            List<Product> allProducts = productRepository.findAll(); // Fetch all products
+
+            if (allProducts.isEmpty() && count > 0) {
+                // This case might indicate an issue or a race condition, but proceed with count for logging
+                log.warn("Product count is {} but findAll() returned an empty list. Proceeding with reindex based on count.", count);
+                // If genuinely no products despite count, treat as no products to reindex to avoid error with empty list to reindexAll
+                if (allProducts.isEmpty()) { // Re-check after findAll
+                    return success(null, "No products to reindex after attempting to fetch all.");
+                }
+            } else if (allProducts.isEmpty()) {
+                return success(null, "No products to reindex.");
+            }
+
+            log.info("Starting reindexing of {} products in Elasticsearch.", allProducts.size());
+            searchService.reindexAll(allProducts); // Pass the fetched products
+            log.info("Successfully initiated reindexing of {} products.", allProducts.size());
+            return success(null, "Product reindexing initiated for " + allProducts.size() + " products.");
+
+        } catch (Exception e) {
+            log.error("Error during product reindexing: {}", e.getMessage(), e);
+            throw new BusinessException(GlobalErrorCode.UNEXPECTED_ERROR, "Failed to reindex products: " + e.getMessage());
+        }
     }
+
+    // --- Product Image Management Endpoints have been moved to ProductImageController ---
+
 } 

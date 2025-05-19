@@ -51,7 +51,7 @@ public class SwaggerConfig {
                         .license(new License()
                                 .name("Private")));
     }
-    
+
     @Bean
     public OpenApiCustomizer uuidSchemaCustomizer() {
         return openApi -> {

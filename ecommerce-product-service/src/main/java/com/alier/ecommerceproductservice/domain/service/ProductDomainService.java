@@ -57,8 +57,7 @@ public class ProductDomainService {
                 product.getName(),
                 product.getDescription(),
                 discountedPrice,
-                product.getStockQuantity(),
-                product.getImageUrl()
+                product.getStockQuantity()
         );
     }
 
@@ -78,12 +77,20 @@ public class ProductDomainService {
         Product sourceProduct = productRepository.findById(sourceProductId)
                 .orElseThrow(() -> new ProductException.ProductNotFoundException(sourceProductId));
 
-        return Product.create(
+        Product replica = Product.create(
                 sourceProduct.getName(),
                 sourceProduct.getDescription(),
                 sourceProduct.getPrice(),
                 0, // Start with zero stock
                 newSku
         );
+
+        if (sourceProduct.getImageUrls() != null && !sourceProduct.getImageUrls().isEmpty()) {
+            for (String imageUrl : sourceProduct.getImageUrls()) {
+                replica.addImageUrl(imageUrl);
+            }
+        }
+
+        return replica;
     }
 } 

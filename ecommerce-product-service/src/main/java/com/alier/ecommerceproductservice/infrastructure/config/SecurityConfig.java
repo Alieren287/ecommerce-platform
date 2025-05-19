@@ -24,9 +24,9 @@ public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
             // Swagger UI
-            "/swagger-ui.html", 
-            "/swagger-ui/**", 
-            "/v3/api-docs/**", 
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
             "/api-docs/**",
             "/swagger-resources/**",
             "/webjars/**",
@@ -39,14 +39,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(AUTH_WHITELIST).permitAll()
-                .anyRequest().authenticated())
-            .httpBasic(Customizer.withDefaults());
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults());
 
 
         return http.build();
@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .password(passwordEncoder().encode("password"))
                 .roles("USER")
                 .build();
-                
+
         UserDetails admin = User.builder()
                 .username("admin")
                 .password(passwordEncoder().encode("admin"))

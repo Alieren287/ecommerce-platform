@@ -30,7 +30,7 @@ public class KafkaConfig {
 
     @Value("${kafka.topic.product-updated}")
     private String productUpdatedTopic;
-    
+
     @Value("${kafka.consumer.group-id:product-service-consumer}")
     private String consumerGroupId;
 
@@ -67,7 +67,7 @@ public class KafkaConfig {
     public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-    
+
     /**
      * Consumer configuration for receiving events.
      */
@@ -90,7 +90,7 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = 
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         // Configure concurrency
