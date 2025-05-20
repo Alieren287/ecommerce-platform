@@ -138,6 +138,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public boolean existsById(UUID productId) {
+        return jpaRepository.existsById(productId);
+    }
+
+    @Override
     public List<Product> findById(List<UUID> productIds) {
         if (productIds == null || productIds.isEmpty()) {
             return List.of();

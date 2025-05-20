@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,9 @@ public class ProductDTO {
     private ProductStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    @Builder.Default
+    private List<ProductVariantResponse> variants = new ArrayList<>();
 
     /**
      * Factory method to create a ProductDTO from a Product entity

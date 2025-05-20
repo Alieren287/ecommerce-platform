@@ -139,4 +139,6 @@ public interface ProductRepository {
      * @return product count
      */
     long count();
-} 
+
+    boolean existsById(UUID productId);
+}

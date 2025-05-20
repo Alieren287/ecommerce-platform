@@ -49,5 +49,35 @@ public class ProductException extends RestBusinessException {
             super(ProductErrorCode.PRODUCT_NOT_FOUND, "Product not found with id: " + id);
         }
     }
-
+    
+    /**
+     * Exception for when a product variant with the same SKU already exists
+     */
+    public static class ProductVariantSkuAlreadyExistsException extends ProductException {
+        public ProductVariantSkuAlreadyExistsException(String sku) {
+            super(ProductErrorCode.PRODUCT_VARIANT_SKU_EXISTS, "Product variant with SKU " + sku + " already exists");
+        }
+    }
+    
+    /**
+     * Exception for when a product variant is out of stock
+     */
+    public static class ProductVariantOutOfStockException extends ProductException {
+        public ProductVariantOutOfStockException(String variantId) {
+            super(ProductErrorCode.PRODUCT_VARIANT_OUT_OF_STOCK, "Product variant with ID " + variantId + " is out of stock");
+        }
+    }
+    
+    /**
+     * Exception for when a product variant cannot be found
+     */
+    public static class ProductVariantNotFoundException extends ProductException {
+        public ProductVariantNotFoundException(String sku) {
+            super(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, "Product variant not found with sku: " + sku);
+        }
+        
+        public ProductVariantNotFoundException(UUID id) {
+            super(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, "Product variant not found with id: " + id);
+        }
+    }
 } 

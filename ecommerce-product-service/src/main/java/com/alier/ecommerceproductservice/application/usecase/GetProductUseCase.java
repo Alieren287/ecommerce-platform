@@ -6,10 +6,13 @@ import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.dto.ProductFilterRequest;
+import com.alier.ecommerceproductservice.application.dto.ProductVariantResponse;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
+import com.alier.ecommerceproductservice.domain.model.ProductVariant;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
+import com.alier.ecommerceproductservice.domain.repository.ProductVariantRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,7 @@ import java.util.stream.Collectors;
 public class GetProductUseCase {
 
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final ProductCacheService productCacheService;
 
     /**
@@ -70,13 +74,26 @@ public class GetProductUseCase {
                                 return new ProductException.ProductNotFoundException(sku);
                             });
 
-                    ProductDTO productDTO = ProductDTO.fromDomain(product);
-
-                    // Store in cache for future requests
-                    productCacheService.cacheProduct(productDTO);
-
-                    return productDTO;
+                    return loadVariantsThenCache(product);
                 });
+    }
+
+    private ProductDTO loadVariantsThenCache(Product product) {
+        ProductDTO productDTO = ProductDTO.fromDomain(product);
+
+        // Load variants for the product
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        if (!variants.isEmpty()) {
+            List<ProductVariantResponse> variantResponses = variants.stream()
+                .map(ProductVariantResponse::fromDomain)
+                .collect(Collectors.toList());
+            productDTO.setVariants(variantResponses);
+        }
+
+        // Store in cache for future requests
+        productCacheService.cacheProduct(productDTO);
+
+        return productDTO;
     }
 
     /**
@@ -302,12 +319,7 @@ public class GetProductUseCase {
                                     return new ProductException.ProductNotFoundException(id);
                                 });
 
-                        ProductDTO productDTO = ProductDTO.fromDomain(product);
-
-                        // Store in cache for future requests
-                        productCacheService.cacheProduct(productDTO);
-
-                        return productDTO;
+                        return loadVariantsThenCache(product);
                     });
         }
     }
