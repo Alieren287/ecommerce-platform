@@ -78,4 +78,9 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
     public boolean existsBySku(String sku) {
         return jpaRepository.existsBySku(sku);
     }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return jpaRepository.existsById(id);
+    }
 } 

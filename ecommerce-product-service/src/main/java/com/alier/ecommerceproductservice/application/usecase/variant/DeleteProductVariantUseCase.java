@@ -42,7 +42,7 @@ public class DeleteProductVariantUseCase {
         @Override
         protected void validate(UUID variantId) throws BusinessException {
             // Check if variant exists
-            if (productVariantRepository.findById(variantId).isEmpty()) {
+            if (!productVariantRepository.existsById(variantId)) {
                 throw new ProductException.ProductVariantNotFoundException(variantId);
             }
 

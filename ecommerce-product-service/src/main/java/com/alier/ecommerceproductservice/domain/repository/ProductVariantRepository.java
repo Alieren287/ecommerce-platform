@@ -78,4 +78,12 @@ public interface ProductVariantRepository {
      * @return true if a product variant with the given SKU exists, false otherwise
      */
     boolean existsBySku(String sku);
-} 
+
+    /**
+     * Check if a product variant with the given SKU exists
+     *
+     * @param id the ID to check
+     * @return true if a product variant with the given ID exists, false otherwise
+     */
+    boolean existsById(UUID id);
+}
