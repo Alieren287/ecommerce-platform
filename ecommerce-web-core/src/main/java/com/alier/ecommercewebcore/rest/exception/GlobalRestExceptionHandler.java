@@ -52,16 +52,6 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Gets the current HTTP request from the RequestContextHolder.
-     *
-     * @return The current HTTP request, or null if not in a request context
-     */
-    protected HttpServletRequest getCurrentRequest() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        return attributes != null ? attributes.getRequest() : null;
-    }
-
-    /**
      * Adds request and trace IDs to a BaseResponse.
      *
      * @param response The response to enhance with IDs

@@ -1,6 +1,8 @@
 package com.alier.ecommerceproductservice.infrastructure.controller;
 
 import com.alier.ecommercecore.common.dto.PaginatedResponse;
+import com.alier.ecommercecore.common.exception.BusinessException;
+import com.alier.ecommercecore.common.exception.ConflictException;
 import com.alier.ecommerceproductservice.application.dto.CreateProductRequest;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.dto.UpdateProductRequest;
@@ -8,8 +10,6 @@ import com.alier.ecommerceproductservice.application.usecase.CreateProductUseCas
 import com.alier.ecommerceproductservice.application.usecase.GetProductUseCase;
 import com.alier.ecommerceproductservice.application.usecase.UpdateProductUseCase;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.repository.ProductRepositoryAdapter;
@@ -116,7 +116,7 @@ class ProductControllerTest {
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
-                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_SKU_EXISTS, ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS));
+                .thenThrow(BusinessException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS));
 
         // When & Then
         mockMvc.perform(post("/api/v1/products")
@@ -124,7 +124,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS)));
+                .andExpect(jsonPath("$.message", is(ProductErrorCode.PRODUCT_SKU_EXISTS.getDefaultMessage())));
     }
 
     @Test
@@ -141,8 +141,7 @@ class ProductControllerTest {
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
-                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NAME_TOO_LONG,
-                        ProductErrorMessages.PRODUCT_NAME_TOO_LONG));
+                .thenThrow(BusinessException.validation(ProductErrorCode.PRODUCT_NAME_TOO_LONG));
 
         // When & Then
         mockMvc.perform(post("/api/v1/products")
@@ -150,7 +149,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NAME_TOO_LONG)));
+                .andExpect(jsonPath("$.message", is(ProductErrorCode.PRODUCT_NAME_TOO_LONG.getDefaultMessage())));
     }
 
     @Test
@@ -185,13 +184,13 @@ class ProductControllerTest {
         UUID productId = UUID.randomUUID();
 
         when(getProductUseCase.getById(productId))
-                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID));
+                .thenThrow(BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         // When & Then
         mockMvc.perform(get("/api/v1/products/{id}", productId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID)));
+                .andExpect(jsonPath("$.message", is(ProductErrorCode.PRODUCT_NOT_FOUND.getDefaultMessage())));
     }
 
     @Test
@@ -281,7 +280,7 @@ class ProductControllerTest {
         );
 
         when(updateProductUseCase.execute(Mockito.eq(productId), any(UpdateProductRequest.class)))
-                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID));
+                .thenThrow(BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         // When & Then
         mockMvc.perform(put("/api/v1/products/{id}", productId)
@@ -289,7 +288,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID)));
+                .andExpect(jsonPath("$.message", is(ProductErrorCode.PRODUCT_NOT_FOUND.getDefaultMessage())));
     }
 
     @Configuration

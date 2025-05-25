@@ -33,6 +33,7 @@ public enum ProductErrorCode implements ErrorCode {
     // Validation errors - Stock Quantity
     STOCK_QUANTITY_NULL("ERR-PRD-010", "Stock quantity is required and cannot be null"),
     STOCK_QUANTITY_NEGATIVE("ERR-PRD-014", "Stock quantity cannot be negative. Please provide a valid quantity of zero or more"),
+    STOCK_QUANTITY_IS_NOT_ENOUGH("ERR-PRD-034", "Stock quantity is not enough for purchase amount"),
 
     // Validation errors - Product Variant Name
     PRODUCT_VARIANT_NAME_NULL("ERR-PRD-015", "Product variant name is required and cannot be null"),

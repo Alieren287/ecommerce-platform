@@ -177,7 +177,7 @@ public class Product {
         }
 
         if (this.stockQuantity < quantity) {
-            throw BusinessException.conflict(ProductErrorCode.PRODUCT_OUT_OF_STOCK);
+            throw BusinessException.validation(ProductErrorCode.STOCK_QUANTITY_IS_NOT_ENOUGH);
         }
 
         this.stockQuantity -= quantity;

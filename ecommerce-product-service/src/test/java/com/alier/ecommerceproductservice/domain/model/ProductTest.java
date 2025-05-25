@@ -1,7 +1,7 @@
 package com.alier.ecommerceproductservice.domain.model;
 
+import com.alier.ecommercecore.common.exception.ValidationException;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class ProductTest {
         String sku = "TEST-SKU-123";
 
         // When & Then
-        ProductException exception = assertThrows(ProductException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Product.create(name, description, price, stockQuantity, sku);
         });
 
@@ -66,7 +66,7 @@ class ProductTest {
         String sku = "TEST-SKU-123";
 
         // When & Then
-        ProductException exception = assertThrows(ProductException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Product.create(name, description, price, stockQuantity, sku);
         });
 
@@ -86,7 +86,7 @@ class ProductTest {
                 "TEST-SKU-123");
 
         // When & Then
-        ProductException exception = assertThrows(ProductException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             product.activate();
         });
 
@@ -106,7 +106,7 @@ class ProductTest {
                 "TEST-SKU-123");
 
         // When & Then
-        ProductException exception = assertThrows(ProductException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             product.activate();
         });
 
@@ -147,11 +147,11 @@ class ProductTest {
         int decreaseAmount = 15;
 
         // When & Then
-        ProductException exception = assertThrows(ProductException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             product.decreaseStock(decreaseAmount);
         });
 
-        assertEquals(ProductErrorCode.PRODUCT_OUT_OF_STOCK, exception.getErrorCode());
-        assertTrue(exception.getMessage().contains("out of stock"));
+        assertEquals(ProductErrorCode.STOCK_QUANTITY_IS_NOT_ENOUGH, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("is not enough"));
     }
 } 
