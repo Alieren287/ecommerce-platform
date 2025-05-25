@@ -44,9 +44,9 @@ To stop all containers, run the `stop-dev-environment.bat` script:
 - **Kafka**: localhost:9092
 - **Zookeeper**: localhost:2181
 - **PostgreSQL**: localhost:5432
-  - Database: ecommerce_products
-  - Username: postgres
-  - Password: postgres
+    - Database: ecommerce_products
+    - Username: postgres
+    - Password: postgres
 - **Elasticsearch**: localhost:9200
 - **Product Service API**: localhost:8081
 
@@ -77,7 +77,8 @@ To stop all containers, run the `stop-dev-environment.bat` script:
 
 - `docker-compose.yml`: Main configuration for all services
 - `docker-compose.override.yml`: Development-specific overrides
-- `ecommerce-product-service/src/main/resources/application-docker.properties`: Docker-specific application configuration
+- `ecommerce-product-service/src/main/resources/application-docker.properties`: Docker-specific application
+  configuration
 
 ## Notes
 

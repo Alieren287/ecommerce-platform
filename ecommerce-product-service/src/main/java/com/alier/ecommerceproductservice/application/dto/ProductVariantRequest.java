@@ -44,7 +44,7 @@ public class ProductVariantRequest {
     @Schema(description = "Available quantity in stock", example = "100")
     private Integer stockQuantity;
 
-    @Schema(description = "Additional attributes of the variant as key-value pairs", 
+    @Schema(description = "Additional attributes of the variant as key-value pairs",
             example = "{\"size\":\"L\",\"color\":\"blue\"}")
     @Builder.Default
     private Map<String, Object> attributes = new HashMap<>();

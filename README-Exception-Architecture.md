@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project implements a simplified categorized exception architecture with **embedded default messages** in error codes. This approach provides a direct relationship between error codes and their messages while maintaining flexibility for custom messages when needed.
+This project implements a simplified categorized exception architecture with **embedded default messages** in error
+codes. This approach provides a direct relationship between error codes and their messages while maintaining flexibility
+for custom messages when needed.
 
 ## Exception Hierarchy
 
@@ -22,7 +24,7 @@ BaseBusinessException (abstract)
 - **`BaseBusinessException`**: Abstract base class for all business exceptions
 - **`BusinessException`**: General business logic violations → HTTP 400 Bad Request
 - **`ValidationException`**: Input validation errors → HTTP 400 Bad Request
-- **`ResourceNotFoundException`**: Resource not found errors → HTTP 404 Not Found  
+- **`ResourceNotFoundException`**: Resource not found errors → HTTP 404 Not Found
 - **`ConflictException`**: Business rule conflicts → HTTP 409 Conflict
 - **`InternalServerException`**: System/technical errors → HTTP 500 Internal Server Error
 
@@ -36,14 +38,15 @@ The `GlobalRestExceptionHandler` automatically maps each exception type to its f
 
 ## Key Innovation: Embedded Default Messages
 
-Error codes now contain their default messages directly, creating a **type-safe relationship** between codes and messages:
+Error codes now contain their default messages directly, creating a **type-safe relationship** between codes and
+messages:
 
 ```java
 public enum ProductErrorCode implements ErrorCode {
     PRODUCT_NOT_FOUND("ERR-PRD-001", "Product not found with the specified identifier"),
     PRODUCT_NAME_NULL("ERR-PRD-004", "Product name is required and cannot be null"),
     PRODUCT_SKU_EXISTS("ERR-PRD-002", "A product with this SKU already exists in the system");
-    
+
     private final String code;
     private final String defaultMessage;
 }
@@ -58,10 +61,14 @@ public enum ProductErrorCode implements ErrorCode {
 throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_NULL);
 // Message: "Product name is required and cannot be null"
 
-throw ProductException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
+throw ProductException.
+
+notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
 // Message: "Product not found with the specified identifier"
 
-throw ProductException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS);
+throw ProductException.
+
+conflict(ProductErrorCode.PRODUCT_SKU_EXISTS);
 // Message: "A product with this SKU already exists in the system"
 ```
 
@@ -72,11 +79,15 @@ throw ProductException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS);
 throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_NULL, 
     "Product name is required for bulk import operation");
 
-throw ProductException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND, 
-    "Product with SKU '" + sku + "' was not found in catalog");
+throw ProductException.
 
-throw ProductException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS, 
-    "Cannot update product: SKU '" + newSku + "' already exists");
+notFound(ProductErrorCode.PRODUCT_NOT_FOUND, 
+    "Product with SKU '"+sku +"' was not found in catalog");
+
+throw ProductException.
+
+conflict(ProductErrorCode.PRODUCT_SKU_EXISTS, 
+    "Cannot update product: SKU '"+newSku +"' already exists");
 ```
 
 ### Direct Exception Usage
@@ -86,7 +97,9 @@ throw ProductException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS,
 throw new ValidationException(ProductErrorCode.PRODUCT_NAME_NULL);
 
 // Using custom messages
-throw new ValidationException(ProductErrorCode.PRODUCT_NAME_NULL, "Custom validation message");
+throw new
+
+ValidationException(ProductErrorCode.PRODUCT_NAME_NULL, "Custom validation message");
 ```
 
 ## Domain-Specific Factory Pattern
@@ -155,6 +168,7 @@ public enum ProductErrorCode implements ErrorCode {
 ## When to Use Custom Messages
 
 Use custom messages when you need:
+
 - **Dynamic values**: Including specific IDs, names, or other runtime data
 - **Context-specific wording**: Different operations need different explanations
 - **User-facing vs. internal messages**: Different audiences need different detail levels
@@ -164,13 +178,13 @@ Use custom messages when you need:
 
 Each exception type has a fixed HTTP status:
 
-| Exception Type | HTTP Status | Usage |
-|----------------|-------------|-------|
-| `ValidationException` | 400 Bad Request | Input validation failures |
-| `BusinessException` | 400 Bad Request | General business rule violations |
-| `ResourceNotFoundException` | 404 Not Found | Resource not found |
-| `ConflictException` | 409 Conflict | Business conflicts (e.g., duplicate SKU) |
-| `InternalServerException` | 500 Internal Server Error | System/technical errors |
+| Exception Type              | HTTP Status               | Usage                                    |
+|-----------------------------|---------------------------|------------------------------------------|
+| `ValidationException`       | 400 Bad Request           | Input validation failures                |
+| `BusinessException`         | 400 Bad Request           | General business rule violations         |
+| `ResourceNotFoundException` | 404 Not Found             | Resource not found                       |
+| `ConflictException`         | 409 Conflict              | Business conflicts (e.g., duplicate SKU) |
+| `InternalServerException`   | 500 Internal Server Error | System/technical errors                  |
 
 ## Migration from Separate Message Classes
 

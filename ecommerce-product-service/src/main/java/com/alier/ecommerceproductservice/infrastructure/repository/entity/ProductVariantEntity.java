@@ -76,7 +76,7 @@ public class ProductVariantEntity {
             log.error("Error serializing attributes to JSON", e);
             attributesJson = "{}";
         }
-        
+
         return ProductVariantEntity.builder()
                 .id(productVariant.getId())
                 .productId(productVariant.getProductId())
@@ -98,13 +98,14 @@ public class ProductVariantEntity {
         Map<String, Object> attributesMap = new HashMap<>();
         if (attributesJson != null && !attributesJson.isEmpty()) {
             try {
-                attributesMap = objectMapper.readValue(attributesJson, 
-                    new TypeReference<Map<String, Object>>() {});
+                attributesMap = objectMapper.readValue(attributesJson,
+                        new TypeReference<Map<String, Object>>() {
+                        });
             } catch (JsonProcessingException e) {
                 log.error("Error deserializing JSON to attributes map", e);
             }
         }
-        
+
         return ProductVariant.builder()
                 .id(this.id)
                 .productId(this.productId)
@@ -117,13 +118,14 @@ public class ProductVariantEntity {
                 .updatedAt(this.updatedAt)
                 .build();
     }
-    
+
     @PostLoad
     private void loadAttributes() {
         if (attributesJson != null && !attributesJson.isEmpty()) {
             try {
-                attributes = objectMapper.readValue(attributesJson, 
-                    new TypeReference<Map<String, Object>>() {});
+                attributes = objectMapper.readValue(attributesJson,
+                        new TypeReference<Map<String, Object>>() {
+                        });
             } catch (JsonProcessingException e) {
                 log.error("Error deserializing JSON to attributes map", e);
                 attributes = new HashMap<>();
@@ -132,7 +134,7 @@ public class ProductVariantEntity {
             attributes = new HashMap<>();
         }
     }
-    
+
     @PrePersist
     @PreUpdate
     private void saveAttributes() {

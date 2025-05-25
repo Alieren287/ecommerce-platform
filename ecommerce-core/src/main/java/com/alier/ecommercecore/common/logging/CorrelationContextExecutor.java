@@ -12,11 +12,11 @@ import java.util.function.Supplier;
  * is different from the thread that completes it.
  */
 public final class CorrelationContextExecutor {
-    
+
     private CorrelationContextExecutor() {
         // Utility class, no instantiation
     }
-    
+
     /**
      * Creates a new Runnable that preserves the current CorrelationContext.
      *
@@ -37,7 +37,7 @@ public final class CorrelationContextExecutor {
             }
         };
     }
-    
+
     /**
      * Creates a new Callable that preserves the current CorrelationContext.
      *
@@ -59,7 +59,7 @@ public final class CorrelationContextExecutor {
             }
         };
     }
-    
+
     /**
      * Creates a new Supplier that preserves the current CorrelationContext.
      *
@@ -81,7 +81,7 @@ public final class CorrelationContextExecutor {
             }
         };
     }
-    
+
     /**
      * Creates a new CompletableFuture that preserves the current CorrelationContext.
      *
@@ -93,7 +93,7 @@ public final class CorrelationContextExecutor {
         return CompletableFuture.supplyAsync(wrap(supplier))
                 .thenCompose(future -> future);
     }
-    
+
     /**
      * Creates a new Executor that wraps all submitted tasks with the current CorrelationContext.
      *

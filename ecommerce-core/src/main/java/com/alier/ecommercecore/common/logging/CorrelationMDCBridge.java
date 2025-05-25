@@ -9,11 +9,11 @@ import java.util.Map;
  * This class synchronizes values between the two contexts.
  */
 public final class CorrelationMDCBridge {
-    
+
     private CorrelationMDCBridge() {
         // Utility class, no instantiation
     }
-    
+
     /**
      * Sets a value in both CorrelationContext and MDC.
      *
@@ -24,7 +24,7 @@ public final class CorrelationMDCBridge {
         CorrelationContext.put(key, value);
         MDC.put(key, value);
     }
-    
+
     /**
      * Removes a value from both CorrelationContext and MDC.
      *
@@ -34,7 +34,7 @@ public final class CorrelationMDCBridge {
         CorrelationContext.put(key, null);
         MDC.remove(key);
     }
-    
+
     /**
      * Copies all values from CorrelationContext to MDC.
      */
@@ -46,7 +46,7 @@ public final class CorrelationMDCBridge {
             }
         }
     }
-    
+
     /**
      * Copies all values from MDC to CorrelationContext.
      * Note: This is not a complete operation as MDC doesn't provide a way to get all values.
@@ -58,14 +58,14 @@ public final class CorrelationMDCBridge {
         copyIfPresent(CorrelationIds.TENANT_ID);
         copyIfPresent(CorrelationIds.USER_ID);
     }
-    
+
     private static void copyIfPresent(String key) {
         String value = MDC.get(key);
         if (value != null) {
             CorrelationContext.put(key, value);
         }
     }
-    
+
     /**
      * Clears all correlation IDs from both CorrelationContext and MDC.
      */

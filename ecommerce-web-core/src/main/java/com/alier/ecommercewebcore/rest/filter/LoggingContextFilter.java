@@ -43,8 +43,8 @@ public class LoggingContextFilter implements Filter {
      */
     private void setupCorrelationIds(HttpServletRequest request, HttpServletResponse response) {
         // Handle trace ID
-        String traceId = extractOrGenerateId(request, 
-                CorrelationIds.TRACE_ID_HEADER, 
+        String traceId = extractOrGenerateId(request,
+                CorrelationIds.TRACE_ID_HEADER,
                 CorrelationIds.DEFAULT_TRACE_ID_PREFIX);
         CorrelationMDCBridge.putCorrelationId(CorrelationIds.TRACE_ID, traceId);
         response.setHeader(CorrelationIds.TRACE_ID_HEADER, traceId);
@@ -68,7 +68,7 @@ public class LoggingContextFilter implements Filter {
     /**
      * Extracts an optional header and sets it in the correlation context if present.
      *
-     * @param request The HTTP request
+     * @param request    The HTTP request
      * @param headerName The header name
      * @param contextKey The context key
      */

@@ -32,11 +32,11 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(25);
         executor.setThreadNamePrefix("app-async-");
         executor.initialize();
-        
+
         // Wrap the executor to preserve correlation context across async boundaries
         return CorrelationContextExecutor.wrapExecutor(executor);
     }
-    
+
     /**
      * Creates a dedicated executor for longer running tasks.
      *
@@ -50,7 +50,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(10);
         executor.setThreadNamePrefix("long-task-");
         executor.initialize();
-        
+
         // Wrap the executor to preserve correlation context across async boundaries
         return CorrelationContextExecutor.wrapExecutor(executor);
     }

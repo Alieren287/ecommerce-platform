@@ -33,7 +33,7 @@ public class ProductDTO {
     private ProductStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+
     @Builder.Default
     private List<ProductVariantResponse> variants = new ArrayList<>();
 

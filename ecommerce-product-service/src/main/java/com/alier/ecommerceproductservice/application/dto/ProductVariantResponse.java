@@ -63,8 +63,8 @@ public class ProductVariantResponse {
                 .sku(variant.getSku())
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
-                .attributes(variant.getAttributes() != null 
-                        ? new HashMap<>(variant.getAttributes()) 
+                .attributes(variant.getAttributes() != null
+                        ? new HashMap<>(variant.getAttributes())
                         : new HashMap<>())
                 .createdAt(variant.getCreatedAt())
                 .updatedAt(variant.getUpdatedAt())

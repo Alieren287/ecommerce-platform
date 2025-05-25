@@ -7,11 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * JPA entity for Product.
@@ -63,7 +59,7 @@ public class ProductEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<ProductVariantEntity> variants = new HashSet<>();

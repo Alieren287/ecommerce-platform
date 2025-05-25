@@ -209,7 +209,7 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
 
         String requestId = getRequestId();
         String traceId = getTraceId();
-        
+
         // If for some reason we couldn't get IDs from context, try to get from the WebRequest
         if (requestId == null || traceId == null) {
             if (webRequest instanceof ServletWebRequest) {

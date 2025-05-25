@@ -55,7 +55,7 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Product ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("productId") UUID productId,
-            
+
             @Valid @RequestBody ProductVariantRequest request) {
         log.info("REST request to create product variant for product ID: {}", productId);
         ProductVariantResponse createdVariant = createProductVariantUseCase.execute(productId, request);
@@ -78,7 +78,7 @@ public class ProductVariantController extends BaseController {
     }
 
     @GetMapping("/paged")
-    @Operation(summary = "Get paginated variants of a product", 
+    @Operation(summary = "Get paginated variants of a product",
             description = "Retrieves variants for a specific product with pagination and sorting")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product variants found"),
@@ -88,7 +88,7 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Product ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("productId") UUID productId,
-            
+
             @Parameter(description = "Page number (0-based)", schema = @Schema(defaultValue = "0"))
             @RequestParam(defaultValue = "0", name = "page") @Min(0) int page,
 
@@ -99,16 +99,16 @@ public class ProductVariantController extends BaseController {
                     allowableValues = {"id", "name", "price", "stockQuantity", "sku", "createdAt", "updatedAt"}))
             @RequestParam(defaultValue = "id", name = "sortBy") String sortBy,
 
-            @Parameter(description = "Sort direction", schema = @Schema(defaultValue = "asc", 
+            @Parameter(description = "Sort direction", schema = @Schema(defaultValue = "asc",
                     allowableValues = {"asc", "desc"}))
             @RequestParam(defaultValue = "asc", name = "sortDir") String sortDir) {
-        
-        log.info("REST request to get paginated variants for product ID: {}, page: {}, size: {}", 
+
+        log.info("REST request to get paginated variants for product ID: {}, page: {}, size: {}",
                 productId, page, size);
-        
-        PaginatedResponse<ProductVariantResponse> variants = 
+
+        PaginatedResponse<ProductVariantResponse> variants =
                 getProductVariantUseCase.getByProductIdPaged(productId, page, size, sortBy, sortDir);
-        
+
         return success(variants);
     }
 
@@ -122,7 +122,7 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Variant ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("variantId") UUID variantId) {
-        
+
         log.info("REST request to get product variant by ID: {}", variantId);
         ProductVariantResponse variant = getProductVariantUseCase.getById(variantId);
         return success(variant);
@@ -137,7 +137,7 @@ public class ProductVariantController extends BaseController {
     public ResponseEntity<BaseResponse<ProductVariantResponse>> getProductVariantBySku(
             @Parameter(description = "Variant SKU", required = true)
             @PathVariable("sku") String sku) {
-        
+
         log.info("REST request to get product variant by SKU: {}", sku);
         ProductVariantResponse variant = getProductVariantUseCase.getBySku(sku);
         return success(variant);
@@ -155,9 +155,9 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Variant ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("variantId") UUID variantId,
-            
+
             @Valid @RequestBody ProductVariantRequest request) {
-        
+
         log.info("REST request to update product variant with ID: {}", variantId);
         ProductVariantResponse updatedVariant = updateProductVariantUseCase.execute(variantId, request);
         return success(updatedVariant, "Product variant updated successfully");
@@ -174,14 +174,14 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Variant ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("variantId") UUID variantId,
-            
+
             @Parameter(description = "New stock quantity", required = true,
                     schema = @Schema(type = "integer", minimum = "0"))
             @RequestParam("quantity") @Min(0) Integer stockQuantity) {
-        
-        log.info("REST request to update stock for product variant with ID: {}, new quantity: {}", 
+
+        log.info("REST request to update stock for product variant with ID: {}, new quantity: {}",
                 variantId, stockQuantity);
-        
+
         ProductVariantResponse updatedVariant = updateProductVariantUseCase.updateStock(variantId, stockQuantity);
         return success(updatedVariant, "Product variant stock updated successfully");
     }
@@ -196,7 +196,7 @@ public class ProductVariantController extends BaseController {
             @Parameter(description = "Variant ID", required = true,
                     schema = @Schema(type = "string", format = "uuid"))
             @PathVariable("variantId") UUID variantId) {
-        
+
         log.info("REST request to delete product variant with ID: {}", variantId);
         deleteProductVariantUseCase.execute(variantId);
         return noContent();
