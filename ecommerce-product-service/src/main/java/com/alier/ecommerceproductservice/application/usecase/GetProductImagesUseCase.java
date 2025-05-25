@@ -3,10 +3,9 @@ package com.alier.ecommerceproductservice.application.usecase;
 import com.alier.ecommercecore.annotations.UseCase;
 import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
-import com.alier.ecommercewebcore.rest.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 
 @UseCase(description = "Retrieves all image URLs for a product.")
 @RequiredArgsConstructor
@@ -40,7 +36,7 @@ public class GetProductImagesUseCase {
         @Override
         protected void validate(GetProductImagesInput input) throws BusinessException {
             if (input.productId() == null) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Product ID cannot be null.");
+                throw BusinessException.validation(ProductErrorCode.INVALID_INPUT_PARAMETER, "Product ID cannot be null.");
             }
         }
 
@@ -58,7 +54,7 @@ public class GetProductImagesUseCase {
             Product product = productRepository.findById(input.productId())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.productId());
-                        return new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
+                        return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                     });
 
             List<String> imageUrls = product.getImageUrls();

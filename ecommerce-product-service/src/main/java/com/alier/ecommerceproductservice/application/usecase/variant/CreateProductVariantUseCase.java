@@ -5,7 +5,8 @@ import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductVariantRequest;
 import com.alier.ecommerceproductservice.application.dto.ProductVariantResponse;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.model.ProductVariant;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.domain.repository.ProductVariantRepository;
@@ -31,16 +32,6 @@ public class CreateProductVariantUseCase {
     private final ProductVariantRepository productVariantRepository;
 
     /**
-     * Input data for the use case
-     */
-    @Data
-    @Builder
-    public static class InputData {
-        private final UUID productId;
-        private final ProductVariantRequest request;
-    }
-
-    /**
      * Creates a new product variant for a product
      *
      * @param productId The ID of the product to create the variant for
@@ -57,6 +48,16 @@ public class CreateProductVariantUseCase {
     }
 
     /**
+     * Input data for the use case
+     */
+    @Data
+    @Builder
+    public static class InputData {
+        private final UUID productId;
+        private final ProductVariantRequest request;
+    }
+
+    /**
      * Handler for creating a product variant
      */
     @RequiredArgsConstructor
@@ -69,13 +70,15 @@ public class CreateProductVariantUseCase {
 
             // Check if the variant SKU already exists
             if (productVariantRepository.existsBySku(request.getSku())) {
-                throw new ProductException.ProductVariantSkuAlreadyExistsException(request.getSku());
+                throw BusinessException.conflict(ProductErrorCode.PRODUCT_VARIANT_SKU_EXISTS);
             }
 
             // Verify product exists
-            if (!productRepository.existsById(productId)) {
-                throw new ProductException.ProductNotFoundException(productId);
-            }
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> {
+                        log.warn("Product not found with ID: {}", productId);
+                        throw BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
+                    });
 
             // Create domain variant
             ProductVariant variant = ProductVariant.create(

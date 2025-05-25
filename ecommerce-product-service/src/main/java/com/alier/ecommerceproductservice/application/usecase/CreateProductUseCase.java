@@ -2,12 +2,11 @@ package com.alier.ecommerceproductservice.application.usecase;
 
 import com.alier.ecommercecore.annotations.UseCase;
 import com.alier.ecommercecore.common.exception.BusinessException;
-import com.alier.ecommercecore.common.exception.ValidationException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.BulkCreateProductRequest;
 import com.alier.ecommerceproductservice.application.dto.CreateProductRequest;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.domain.service.ProductDomainService;
@@ -21,9 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 
 /**
  * Use case for creating a new product.
@@ -43,10 +39,10 @@ public class CreateProductUseCase extends UseCaseHandler<CreateProductRequest, P
      * Validates that the product SKU is available
      */
     @Override
-    protected void validate(CreateProductRequest request) throws ProductException {
-        if (productDomainService.isSkuExists(request.getSku())) {
-            log.warn("Product SKU already exists: {}", request.getSku());
-            throw new ProductException.validation(ProductErrorCode.PRODUCT_SKU_EXISTS, ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS);
+    protected void validate(CreateProductRequest request) throws BusinessException {
+        // Check if SKU already exists
+        if (productRepository.existsBySku(request.getSku())) {
+            throw BusinessException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS);
         }
     }
 
@@ -92,7 +88,8 @@ public class CreateProductUseCase extends UseCaseHandler<CreateProductRequest, P
         // If any SKUs already exist, throw exception with all duplicates
         if (!existingSkus.isEmpty()) {
             log.warn("Found {} existing SKUs during bulk creation: {}", existingSkus.size(), existingSkus);
-            throw new ProductException(ProductErrorCode.PRODUCT_SKU_EXISTS, ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS);
+            throw BusinessException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS,
+                    "The following SKUs already exist: " + String.join(", ", existingSkus));
         }
 
         // Create all products

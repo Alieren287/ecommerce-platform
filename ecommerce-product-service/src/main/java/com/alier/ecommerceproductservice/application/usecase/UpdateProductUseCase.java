@@ -8,7 +8,6 @@ import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.dto.ProductPatchRequest;
 import com.alier.ecommerceproductservice.application.dto.UpdateProductRequest;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
@@ -46,7 +45,7 @@ public class UpdateProductUseCase {
      * @param id      the ID of the product to update
      * @param request the update product request
      * @return the updated product DTO
-     * @throws ProductException if the product is not found
+     * @throws BusinessException if the product is not found
      */
     @Transactional
     public ProductDTO execute(UUID id, UpdateProductRequest request) {
@@ -59,7 +58,7 @@ public class UpdateProductUseCase {
      * @param id      the ID of the product to update
      * @param request the patch product request (with only the fields that need to be updated)
      * @return the updated product DTO
-     * @throws ProductException if the product is not found
+     * @throws BusinessException if the product is not found
      */
     @Transactional
     public ProductDTO executePatch(UUID id, ProductPatchRequest request) {
@@ -69,7 +68,7 @@ public class UpdateProductUseCase {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with ID: {}", id);
-                    return new ProductException.ProductNotFoundException(id);
+                    return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                 });
 
         boolean updated = false;
@@ -184,10 +183,8 @@ public class UpdateProductUseCase {
         // If any products are not found, throw exception
         if (!notFoundIds.isEmpty()) {
             log.warn("Some products were not found during bulk update: {}", notFoundIds);
-            throw new ProductException(
-                    ProductErrorCode.PRODUCT_NOT_FOUND,
-                    "The following products were not found: " + notFoundIds
-            );
+            throw BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND,
+                    "The following products were not found: " + notFoundIds);
         }
 
         // Update each product
@@ -235,7 +232,7 @@ public class UpdateProductUseCase {
      *
      * @param id the ID of the product to activate
      * @return the activated product DTO
-     * @throws ProductException if the product is not found or cannot be activated
+     * @throws BusinessException if the product is not found or cannot be activated
      */
     @Transactional
     public ProductDTO activateProduct(UUID id) {
@@ -244,7 +241,7 @@ public class UpdateProductUseCase {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with ID: {}", id);
-                    return new ProductException.ProductNotFoundException(id);
+                    return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                 });
 
         Product activatedProduct = product.activate();
@@ -266,7 +263,7 @@ public class UpdateProductUseCase {
      *
      * @param id the ID of the product to deactivate
      * @return the deactivated product DTO
-     * @throws ProductException if the product is not found
+     * @throws BusinessException if the product is not found
      */
     @Transactional
     public ProductDTO deactivateProduct(UUID id) {
@@ -275,7 +272,7 @@ public class UpdateProductUseCase {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with ID: {}", id);
-                    return new ProductException.ProductNotFoundException(id);
+                    return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                 });
 
         Product deactivatedProduct = product.deactivate();
@@ -310,7 +307,7 @@ public class UpdateProductUseCase {
             Product product = productRepository.findById(input.id())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.id());
-                        return new ProductException.ProductNotFoundException(input.id());
+                        return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                     });
 
             UpdateProductRequest request = input.request();

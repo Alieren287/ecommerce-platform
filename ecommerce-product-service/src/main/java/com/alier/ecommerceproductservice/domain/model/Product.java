@@ -1,7 +1,7 @@
 package com.alier.ecommerceproductservice.domain.model;
 
+import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -73,39 +73,39 @@ public class Product {
 
     private static void validateName(String name) {
         if (name == null) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_NULL);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_NAME_NULL);
         }
-        
+
         if (name.trim().isEmpty()) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_NAME_EMPTY);
         }
 
         if (name.length() > 255) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_TOO_LONG);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_NAME_TOO_LONG);
         }
     }
 
     private static void validatePrice(BigDecimal price) {
         if (price == null) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_NULL);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_PRICE_NULL);
         }
 
         if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_NEGATIVE);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_PRICE_NEGATIVE);
         }
-        
+
         if (price.compareTo(BigDecimal.ZERO) == 0) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_ZERO);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_PRICE_ZERO);
         }
     }
 
     private static void validateStockQuantity(Integer stockQuantity) {
         if (stockQuantity == null) {
-            throw ProductException.validation(ProductErrorCode.STOCK_QUANTITY_NULL);
+            throw BusinessException.validation(ProductErrorCode.STOCK_QUANTITY_NULL);
         }
 
         if (stockQuantity < 0) {
-            throw ProductException.validation(ProductErrorCode.STOCK_QUANTITY_NEGATIVE);
+            throw BusinessException.validation(ProductErrorCode.STOCK_QUANTITY_NEGATIVE);
         }
     }
 
@@ -146,10 +146,10 @@ public class Product {
      */
     public Product activate() {
         if (this.stockQuantity <= 0) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_STOCK);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_STOCK);
         }
         if (this.imageUrls == null || this.imageUrls.isEmpty()) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_IMAGES);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_IMAGES);
         }
 
         this.status = ProductStatus.ACTIVE;
@@ -173,11 +173,11 @@ public class Product {
      */
     public Product decreaseStock(int quantity) {
         if (quantity <= 0) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_DECREASE_QUANTITY_INVALID);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_DECREASE_QUANTITY_INVALID);
         }
 
         if (this.stockQuantity < quantity) {
-            throw ProductException.conflict(ProductErrorCode.PRODUCT_OUT_OF_STOCK);
+            throw BusinessException.conflict(ProductErrorCode.PRODUCT_OUT_OF_STOCK);
         }
 
         this.stockQuantity -= quantity;
@@ -191,7 +191,7 @@ public class Product {
      */
     public Product increaseStock(int quantity) {
         if (quantity <= 0) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_INCREASE_QUANTITY_INVALID);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_INCREASE_QUANTITY_INVALID);
         }
 
         this.stockQuantity += quantity;
@@ -208,7 +208,7 @@ public class Product {
      */
     public Product addImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
         }
         if (this.imageUrls == null) {
             this.imageUrls = new ArrayList<>();
@@ -228,7 +228,7 @@ public class Product {
      */
     public Product removeImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw ProductException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
         }
         if (this.imageUrls != null && this.imageUrls.remove(imageUrl)) {
             this.updatedAt = LocalDateTime.now();

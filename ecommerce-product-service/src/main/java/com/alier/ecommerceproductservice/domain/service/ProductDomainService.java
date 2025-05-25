@@ -1,9 +1,8 @@
 package com.alier.ecommerceproductservice.domain.service;
 
 import com.alier.ecommercecore.annotations.DomainService;
+import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +42,7 @@ public class ProductDomainService {
      */
     public Product applyDiscount(Product product, int discountPercentage) {
         if (discountPercentage < 0 || discountPercentage > 100) {
-            throw new ProductException(ProductErrorCode.PRODUCT_DISCOUNT_INVALID,
-                    ProductErrorMessages.PRODUCT_DISCOUNT_PERCENTAGE_INVALID);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_DISCOUNT_INVALID);
         }
 
         if (discountPercentage == 0) {
@@ -68,15 +66,15 @@ public class ProductDomainService {
      * @param sourceProductId the ID of the product to replicate
      * @param newSku          the SKU for the new product
      * @return the replicated product
-     * @throws ProductException if the product doesn't exist or the SKU is already in use
+     * @throws BusinessException if the product doesn't exist or the SKU is already in use
      */
     public Product replicateProduct(UUID sourceProductId, String newSku) {
         if (isSkuExists(newSku)) {
-            throw new ProductException(ProductErrorCode.PRODUCT_SKU_EXISTS, ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS);
+            throw BusinessException.conflict(ProductErrorCode.PRODUCT_SKU_EXISTS);
         }
 
         Product sourceProduct = productRepository.findById(sourceProductId)
-                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID));
+                .orElseThrow(() -> BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         Product replica = Product.create(
                 sourceProduct.getName(),

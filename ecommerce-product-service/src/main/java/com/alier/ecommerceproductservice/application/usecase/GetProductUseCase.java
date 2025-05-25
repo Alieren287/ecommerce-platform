@@ -7,7 +7,7 @@ import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.dto.ProductFilterRequest;
 import com.alier.ecommerceproductservice.application.dto.ProductVariantResponse;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
 import com.alier.ecommerceproductservice.domain.model.ProductVariant;
@@ -58,7 +58,7 @@ public class GetProductUseCase {
      *
      * @param sku the product SKU
      * @return the product DTO
-     * @throws ProductException if the product is not found
+     * @throws BusinessException if the product is not found
      */
     @Transactional(readOnly = true)
     public ProductDTO getBySku(String sku) {
@@ -70,8 +70,8 @@ public class GetProductUseCase {
                     // If not in cache, get from repository
                     Product product = productRepository.findBySku(sku)
                             .orElseThrow(() -> {
-                                log.warn("Product not found with ID: {}", sku);
-                                return new ProductException.ProductNotFoundException(sku);
+                                log.warn("Product not found with SKU: {}", sku);
+                                return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                             });
 
                     return loadVariantsThenCache(product);
@@ -85,8 +85,8 @@ public class GetProductUseCase {
         List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
         if (!variants.isEmpty()) {
             List<ProductVariantResponse> variantResponses = variants.stream()
-                .map(ProductVariantResponse::fromDomain)
-                .collect(Collectors.toList());
+                    .map(ProductVariantResponse::fromDomain)
+                    .collect(Collectors.toList());
             productDTO.setVariants(variantResponses);
         }
 
@@ -316,7 +316,7 @@ public class GetProductUseCase {
                         Product product = productRepository.findById(id)
                                 .orElseThrow(() -> {
                                     log.warn("Product not found with ID: {}", id);
-                                    return new ProductException.ProductNotFoundException(id);
+                                    return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                                 });
 
                         return loadVariantsThenCache(product);

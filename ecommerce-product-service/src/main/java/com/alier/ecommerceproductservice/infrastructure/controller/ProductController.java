@@ -7,12 +7,12 @@ import com.alier.ecommerceproductservice.application.dto.*;
 import com.alier.ecommerceproductservice.application.usecase.CreateProductUseCase;
 import com.alier.ecommerceproductservice.application.usecase.GetProductUseCase;
 import com.alier.ecommerceproductservice.application.usecase.UpdateProductUseCase;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
 import com.alier.ecommercewebcore.rest.controller.BaseController;
-import com.alier.ecommercewebcore.rest.exception.GlobalErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -358,13 +358,12 @@ public class ProductController extends BaseController {
 
         log.info("REST request to get products with price between {} and {}", minPrice, maxPrice);
 
-        // Validate price range
-        if (minPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Minimum price cannot be negative");
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw BusinessException.validation(ProductErrorCode.INVALID_PRICE_RANGE, "Minimum price cannot be negative");
         }
 
-        if (maxPrice.compareTo(minPrice) < 0) {
-            throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Maximum price cannot be less than minimum price");
+        if (minPrice != null && maxPrice != null && maxPrice.compareTo(minPrice) < 0) {
+            throw BusinessException.validation(ProductErrorCode.INVALID_PRICE_RANGE, "Maximum price cannot be less than minimum price");
         }
 
         PaginatedResponse<ProductDTO> products = getProductUseCase.getProductsByPriceRange(minPrice, maxPrice, page, size, sortBy, sortDir);
@@ -516,7 +515,7 @@ public class ProductController extends BaseController {
 
         } catch (Exception e) {
             log.error("Error during product reindexing: {}", e.getMessage(), e);
-            throw new BusinessException(GlobalErrorCode.UNEXPECTED_ERROR, "Failed to reindex products: " + e.getMessage());
+            throw BusinessException.internalServer(ProductErrorCode.PRODUCT_REINDEX_FAILED, "Failed to reindex products: " + e.getMessage());
         }
     }
 

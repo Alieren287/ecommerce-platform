@@ -5,15 +5,12 @@ import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.service.ImageStorageService;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
 import com.alier.ecommerceproductservice.infrastructure.messaging.ProductEventPublisher;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
-import com.alier.ecommercewebcore.rest.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,15 +50,15 @@ public class DeleteProductImageUseCase {
         @Override
         protected void validate(DeleteProductImageInput input) throws BusinessException {
             if (input.productId() == null) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Product ID cannot be null.");
+                throw BusinessException.validation(ProductErrorCode.INVALID_INPUT_PARAMETER, "Product ID cannot be null.");
             }
             if (input.imageUrlToDelete() == null || input.imageUrlToDelete().trim().isEmpty()) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Image URL to delete cannot be empty.");
+                throw BusinessException.validation(ProductErrorCode.INVALID_INPUT_PARAMETER, "Image URL to delete cannot be empty.");
             }
             try {
                 new URI(input.imageUrlToDelete()); // Validate if it's a valid URI
             } catch (URISyntaxException e) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Invalid image URL format.");
+                throw BusinessException.validation(ProductErrorCode.INVALID_INPUT_PARAMETER, "Invalid image URL format.");
             }
         }
 
@@ -72,7 +69,7 @@ public class DeleteProductImageUseCase {
             Product product = productRepository.findById(input.productId())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.productId());
-                        return new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
+                        return BusinessException.notFound(ProductErrorCode.PRODUCT_NOT_FOUND);
                     });
 
             String imageUrlToDelete = input.imageUrlToDelete();

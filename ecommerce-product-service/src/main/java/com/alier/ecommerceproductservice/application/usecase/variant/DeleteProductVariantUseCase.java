@@ -3,7 +3,8 @@ package com.alier.ecommerceproductservice.application.usecase.variant;
 import com.alier.ecommercecore.annotations.UseCase;
 import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.model.ProductVariant;
 import com.alier.ecommerceproductservice.domain.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
-
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 
 /**
  * Use case for deleting product variants.
@@ -45,10 +43,8 @@ public class DeleteProductVariantUseCase {
         @Override
         protected void validate(UUID variantId) throws BusinessException {
             // Check if variant exists
-            if (!productVariantRepository.existsById(variantId)) {
-                throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_ID);
-            }
-
+            ProductVariant variant = productVariantRepository.findById(variantId)
+                    .orElseThrow(() -> BusinessException.notFound(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         }
 
         @Override

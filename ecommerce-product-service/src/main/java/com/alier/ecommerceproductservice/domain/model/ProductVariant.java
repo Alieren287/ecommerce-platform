@@ -1,8 +1,7 @@
 package com.alier.ecommerceproductservice.domain.model;
 
+import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
-import com.alier.ecommerceproductservice.domain.exception.ProductException;
-import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,22 +21,22 @@ import java.util.UUID;
 public class ProductVariant {
 
     private UUID id;
-    
+
     private UUID productId;
-    
+
     private String name;
-    
+
     private String sku;
-    
+
     private BigDecimal price;
-    
+
     private Integer stockQuantity;
-    
+
     @Builder.Default
     private Map<String, Object> attributes = new HashMap<>();
-    
+
     private LocalDateTime createdAt;
-    
+
     private LocalDateTime updatedAt;
 
     /**
@@ -72,47 +71,39 @@ public class ProductVariant {
 
     private static void validateName(String name) {
         if (name == null) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_NULL,
-                    ProductErrorMessages.PRODUCT_VARIANT_NAME_CANNOT_BE_NULL);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_NAME_NULL);
         }
-        
+
         if (name.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_EMPTY,
-                    ProductErrorMessages.PRODUCT_VARIANT_NAME_CANNOT_BE_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_NAME_EMPTY);
         }
 
         if (name.length() > 255) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_TOO_LONG,
-                    ProductErrorMessages.PRODUCT_VARIANT_NAME_TOO_LONG);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_NAME_TOO_LONG);
         }
     }
 
     private static void validatePrice(BigDecimal price) {
         if (price == null) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_NULL,
-                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_NULL);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_PRICE_NULL);
         }
 
         if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_NEGATIVE,
-                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_NEGATIVE);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_PRICE_NEGATIVE);
         }
-        
+
         if (price.compareTo(BigDecimal.ZERO) == 0) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_ZERO,
-                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_ZERO);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_PRICE_ZERO);
         }
     }
 
     private static void validateStockQuantity(Integer stockQuantity) {
         if (stockQuantity == null) {
-            throw new ProductException(ProductErrorCode.STOCK_QUANTITY_NULL,
-                    ProductErrorMessages.STOCK_QUANTITY_CANNOT_BE_NULL);
+            throw BusinessException.validation(ProductErrorCode.STOCK_QUANTITY_NULL);
         }
 
         if (stockQuantity < 0) {
-            throw new ProductException(ProductErrorCode.STOCK_QUANTITY_NEGATIVE,
-                    ProductErrorMessages.STOCK_QUANTITY_CANNOT_BE_NEGATIVE);
+            throw BusinessException.validation(ProductErrorCode.STOCK_QUANTITY_NEGATIVE);
         }
     }
 
@@ -155,12 +146,11 @@ public class ProductVariant {
      */
     public ProductVariant decreaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_DECREASE_QUANTITY_INVALID,
-                    ProductErrorMessages.PRODUCT_VARIANT_DECREASE_QUANTITY_MUST_BE_POSITIVE);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_DECREASE_QUANTITY_INVALID);
         }
 
         if (this.stockQuantity < quantity) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_OUT_OF_STOCK, ProductErrorMessages.PRODUCT_VARIANT_OUT_OF_STOCK);
+            throw BusinessException.conflict(ProductErrorCode.PRODUCT_VARIANT_OUT_OF_STOCK);
         }
 
         this.stockQuantity -= quantity;
@@ -174,8 +164,7 @@ public class ProductVariant {
      */
     public ProductVariant increaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_INCREASE_QUANTITY_INVALID,
-                    ProductErrorMessages.PRODUCT_VARIANT_INCREASE_QUANTITY_MUST_BE_POSITIVE);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_INCREASE_QUANTITY_INVALID);
         }
 
         this.stockQuantity += quantity;
@@ -183,33 +172,31 @@ public class ProductVariant {
 
         return this;
     }
-    
+
     /**
      * Adds or updates an attribute
      */
     public ProductVariant setAttribute(String key, Object value) {
         if (key == null || key.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY,
-                    ProductErrorMessages.PRODUCT_VARIANT_ATTRIBUTE_KEY_CANNOT_BE_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY);
         }
         this.attributes.put(key, value);
         this.updatedAt = LocalDateTime.now();
         return this;
     }
-    
+
     /**
      * Removes an attribute
      */
     public ProductVariant removeAttribute(String key) {
         if (key == null || key.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY,
-                    ProductErrorMessages.PRODUCT_VARIANT_ATTRIBUTE_KEY_CANNOT_BE_EMPTY);
+            throw BusinessException.validation(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY);
         }
         this.attributes.remove(key);
         this.updatedAt = LocalDateTime.now();
         return this;
     }
-    
+
     /**
      * Gets an attribute value
      */
