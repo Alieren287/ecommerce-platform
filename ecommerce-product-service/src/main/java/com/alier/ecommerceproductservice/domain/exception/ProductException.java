@@ -1,83 +1,52 @@
 package com.alier.ecommerceproductservice.domain.exception;
 
-import com.alier.ecommercewebcore.rest.exception.RestBusinessException;
-
-import java.util.UUID;
+import com.alier.ecommercecore.common.exception.*;
 
 /**
- * Domain-specific exception for product-related errors.
+ * Factory class for creating product-related exceptions.
+ * Supports both default messages from error codes and custom message overrides.
  */
-public class ProductException extends RestBusinessException {
+public class ProductException {
 
-    /**
-     * Product-specific error with custom message
-     *
-     * @param productErrorCode The product-specific error code
-     * @param message          Custom error message
-     */
-    public ProductException(ProductErrorCode productErrorCode, String message) {
-        super(productErrorCode, message);
+    // Factory methods using default messages from error codes
+    public static ValidationException validation(ProductErrorCode errorCode) {
+        return new ValidationException(errorCode, errorCode.getDefaultMessage());
     }
 
-    /**
-     * Exception for when a product with the same SKU already exists
-     */
-    public static class ProductSkuAlreadyExistsException extends ProductException {
-        public ProductSkuAlreadyExistsException(String sku) {
-            super(ProductErrorCode.PRODUCT_SKU_EXISTS, "Product with SKU " + sku + " already exists");
-        }
+    public static ResourceNotFoundException notFound(ProductErrorCode errorCode) {
+        return new ResourceNotFoundException(errorCode, errorCode.getDefaultMessage());
     }
 
-    /**
-     * Exception for when a product is out of stock
-     */
-    public static class ProductOutOfStockException extends ProductException {
-        public ProductOutOfStockException(String productId) {
-            super(ProductErrorCode.PRODUCT_OUT_OF_STOCK, "Product with ID " + productId + " is out of stock");
-        }
+    public static ConflictException conflict(ProductErrorCode errorCode) {
+        return new ConflictException(errorCode, errorCode.getDefaultMessage());
     }
 
-    /**
-     * Exception for when a product cannot be found
-     */
-    public static class ProductNotFoundException extends ProductException {
-        public ProductNotFoundException(String sku) {
-            super(ProductErrorCode.PRODUCT_NOT_FOUND, "Product not found with sku: " + sku);
-        }
+    public static InternalServerException internalServer(ProductErrorCode errorCode) {
+        return new InternalServerException(errorCode, errorCode.getDefaultMessage());
+    }
 
-        public ProductNotFoundException(UUID id) {
-            super(ProductErrorCode.PRODUCT_NOT_FOUND, "Product not found with id: " + id);
-        }
+    public static BusinessException business(ProductErrorCode errorCode) {
+        return new BusinessException(errorCode, errorCode.getDefaultMessage());
     }
-    
-    /**
-     * Exception for when a product variant with the same SKU already exists
-     */
-    public static class ProductVariantSkuAlreadyExistsException extends ProductException {
-        public ProductVariantSkuAlreadyExistsException(String sku) {
-            super(ProductErrorCode.PRODUCT_VARIANT_SKU_EXISTS, "Product variant with SKU " + sku + " already exists");
-        }
+
+    // Factory methods with custom message overrides
+    public static ValidationException validation(ProductErrorCode errorCode, String customMessage) {
+        return new ValidationException(errorCode, customMessage);
     }
-    
-    /**
-     * Exception for when a product variant is out of stock
-     */
-    public static class ProductVariantOutOfStockException extends ProductException {
-        public ProductVariantOutOfStockException(String variantId) {
-            super(ProductErrorCode.PRODUCT_VARIANT_OUT_OF_STOCK, "Product variant with ID " + variantId + " is out of stock");
-        }
+
+    public static ResourceNotFoundException notFound(ProductErrorCode errorCode, String customMessage) {
+        return new ResourceNotFoundException(errorCode, customMessage);
     }
-    
-    /**
-     * Exception for when a product variant cannot be found
-     */
-    public static class ProductVariantNotFoundException extends ProductException {
-        public ProductVariantNotFoundException(String sku) {
-            super(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, "Product variant not found with sku: " + sku);
-        }
-        
-        public ProductVariantNotFoundException(UUID id) {
-            super(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, "Product variant not found with id: " + id);
-        }
+
+    public static ConflictException conflict(ProductErrorCode errorCode, String customMessage) {
+        return new ConflictException(errorCode, customMessage);
+    }
+
+    public static InternalServerException internalServer(ProductErrorCode errorCode, String customMessage) {
+        return new InternalServerException(errorCode, customMessage);
+    }
+
+    public static BusinessException business(ProductErrorCode errorCode, String customMessage) {
+        return new BusinessException(errorCode, customMessage);
     }
 } 

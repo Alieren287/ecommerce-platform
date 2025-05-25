@@ -2,6 +2,7 @@ package com.alier.ecommerceproductservice.domain.model;
 
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -70,38 +71,48 @@ public class ProductVariant {
     }
 
     private static void validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_NAME,
-                    "Product variant name cannot be empty");
+        if (name == null) {
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_NULL,
+                    ProductErrorMessages.PRODUCT_VARIANT_NAME_CANNOT_BE_NULL);
+        }
+        
+        if (name.trim().isEmpty()) {
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_EMPTY,
+                    ProductErrorMessages.PRODUCT_VARIANT_NAME_CANNOT_BE_EMPTY);
         }
 
         if (name.length() > 255) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_NAME,
-                    "Product variant name is too long (max 255 characters)");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NAME_TOO_LONG,
+                    ProductErrorMessages.PRODUCT_VARIANT_NAME_TOO_LONG);
         }
     }
 
     private static void validatePrice(BigDecimal price) {
         if (price == null) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_PRICE,
-                    "Price cannot be null");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_NULL,
+                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_NULL);
         }
 
         if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_PRICE,
-                    "Price cannot be negative");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_NEGATIVE,
+                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_NEGATIVE);
+        }
+        
+        if (price.compareTo(BigDecimal.ZERO) == 0) {
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_PRICE_ZERO,
+                    ProductErrorMessages.PRODUCT_VARIANT_PRICE_CANNOT_BE_ZERO);
         }
     }
 
     private static void validateStockQuantity(Integer stockQuantity) {
         if (stockQuantity == null) {
-            throw new ProductException(ProductErrorCode.INVALID_STOCK_QUANTITY,
-                    "Stock quantity cannot be null");
+            throw new ProductException(ProductErrorCode.STOCK_QUANTITY_NULL,
+                    ProductErrorMessages.STOCK_QUANTITY_CANNOT_BE_NULL);
         }
 
         if (stockQuantity < 0) {
-            throw new ProductException(ProductErrorCode.INVALID_STOCK_QUANTITY,
-                    "Stock quantity cannot be negative");
+            throw new ProductException(ProductErrorCode.STOCK_QUANTITY_NEGATIVE,
+                    ProductErrorMessages.STOCK_QUANTITY_CANNOT_BE_NEGATIVE);
         }
     }
 
@@ -144,12 +155,12 @@ public class ProductVariant {
      */
     public ProductVariant decreaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION,
-                    "Quantity to decrease must be positive");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_DECREASE_QUANTITY_INVALID,
+                    ProductErrorMessages.PRODUCT_VARIANT_DECREASE_QUANTITY_MUST_BE_POSITIVE);
         }
 
         if (this.stockQuantity < quantity) {
-            throw new ProductException.ProductOutOfStockException(this.id.toString());
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_OUT_OF_STOCK, ProductErrorMessages.PRODUCT_VARIANT_OUT_OF_STOCK);
         }
 
         this.stockQuantity -= quantity;
@@ -163,8 +174,8 @@ public class ProductVariant {
      */
     public ProductVariant increaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION,
-                    "Quantity to increase must be positive");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_INCREASE_QUANTITY_INVALID,
+                    ProductErrorMessages.PRODUCT_VARIANT_INCREASE_QUANTITY_MUST_BE_POSITIVE);
         }
 
         this.stockQuantity += quantity;
@@ -178,8 +189,8 @@ public class ProductVariant {
      */
     public ProductVariant setAttribute(String key, Object value) {
         if (key == null || key.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_OPERATION, 
-                    "Attribute key cannot be empty");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY,
+                    ProductErrorMessages.PRODUCT_VARIANT_ATTRIBUTE_KEY_CANNOT_BE_EMPTY);
         }
         this.attributes.put(key, value);
         this.updatedAt = LocalDateTime.now();
@@ -191,8 +202,8 @@ public class ProductVariant {
      */
     public ProductVariant removeAttribute(String key) {
         if (key == null || key.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_VARIANT_OPERATION, 
-                    "Attribute key cannot be empty");
+            throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_ATTRIBUTE_KEY_EMPTY,
+                    ProductErrorMessages.PRODUCT_VARIANT_ATTRIBUTE_KEY_CANNOT_BE_EMPTY);
         }
         this.attributes.remove(key);
         this.updatedAt = LocalDateTime.now();

@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
+
 /**
  * Use case for retrieving product variants.
  */
@@ -116,7 +119,7 @@ public class GetProductVariantUseCase {
         @Override
         protected ProductVariantResponse handle(UUID variantId) throws BusinessException {
             ProductVariant variant = productVariantRepository.findById(variantId)
-                    .orElseThrow(() -> new ProductException.ProductVariantNotFoundException(variantId));
+                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_ID));
             
             return ProductVariantResponse.fromDomain(variant);
         }
@@ -129,7 +132,7 @@ public class GetProductVariantUseCase {
         @Override
         protected ProductVariantResponse handle(String sku) throws BusinessException {
             ProductVariant variant = productVariantRepository.findBySku(sku)
-                    .orElseThrow(() -> new ProductException.ProductVariantNotFoundException(sku));
+                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_SKU));
             
             return ProductVariantResponse.fromDomain(variant);
         }
@@ -142,7 +145,7 @@ public class GetProductVariantUseCase {
         @Override
         protected void validate(UUID productId) throws BusinessException {
             if (!productRepository.existsById(productId)) {
-                throw new ProductException.ProductNotFoundException(productId);
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
             }
         }
 
@@ -165,7 +168,7 @@ public class GetProductVariantUseCase {
         protected void validate(PaginatedQueryInput input) throws BusinessException {
             // Verify that the product exists
             if (!productRepository.existsById(input.getProductId())) {
-                throw new ProductException.ProductNotFoundException(input.getProductId());
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
             }
 
         }

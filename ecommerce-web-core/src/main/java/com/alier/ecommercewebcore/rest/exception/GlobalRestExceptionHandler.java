@@ -1,7 +1,7 @@
 package com.alier.ecommercewebcore.rest.exception;
 
 import com.alier.ecommercecore.common.dto.BaseResponse;
-import com.alier.ecommercecore.common.exception.BusinessException;
+import com.alier.ecommercecore.common.exception.*;
 import com.alier.ecommercecore.common.logging.CorrelationContext;
 import com.alier.ecommercecore.common.logging.CorrelationIds;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 /**
  * Global exception handler for REST controllers.
- * Provides consistent error responses for common exceptions.
+ * Provides consistent error responses for all categorized exceptions.
  */
 @Slf4j
 @RestControllerAdvice
@@ -97,14 +97,14 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle general business logic exceptions.
+     * Handles validation exceptions (HTTP 400 Bad Request).
      *
-     * @param ex The exception
+     * @param ex The validation exception
      * @return A response entity with error details
      */
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<BaseResponse<Void>> handleBusinessException(BusinessException ex) {
-        log.warn("Business rule violation, requestId: {}, traceId: {}, errorCode: {}, message: {}",
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<BaseResponse<Void>> handleValidationException(ValidationException ex) {
+        log.warn("Validation exception occurred, requestId: {}, traceId: {}, errorCode: {}, message: {}",
                 getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage());
 
         return ResponseEntity
@@ -113,18 +113,66 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle general business logic exceptions.
+     * Handles conflict exceptions (HTTP 409 Conflict).
      *
-     * @param ex The exception
+     * @param ex The conflict exception
      * @return A response entity with error details
      */
-    @ExceptionHandler(RestBusinessException.class)
-    public ResponseEntity<BaseResponse<Void>> handleRestBusinessException(RestBusinessException ex) {
-        log.warn("Rest business rule violation, requestId: {}, traceId: {}, errorCode: {}, message: {}",
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<BaseResponse<Void>> handleConflictException(ConflictException ex) {
+        log.warn("Conflict exception occurred, requestId: {}, traceId: {}, errorCode: {}, message: {}",
                 getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage());
 
         return ResponseEntity
-                .status(ex.getErrorCode().getHttpStatus())
+                .status(HttpStatus.CONFLICT)
+                .body(addIds(BaseResponse.error(ex.getMessage())));
+    }
+
+    /**
+     * Handles resource not found exceptions (HTTP 404 Not Found).
+     *
+     * @param ex The resource not found exception
+     * @return A response entity with error details
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<BaseResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        log.warn("Resource not found exception occurred, requestId: {}, traceId: {}, errorCode: {}, message: {}",
+                getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(addIds(BaseResponse.error(ex.getMessage())));
+    }
+
+    /**
+     * Handles internal server exceptions (HTTP 500 Internal Server Error).
+     *
+     * @param ex The internal server exception
+     * @return A response entity with error details
+     */
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<BaseResponse<Void>> handleInternalServerException(InternalServerException ex) {
+        log.error("Internal server exception occurred, requestId: {}, traceId: {}, errorCode: {}, message: {}",
+                getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage(), ex);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(addIds(BaseResponse.error(ex.getMessage())));
+    }
+
+    /**
+     * Handles general business logic exceptions (fallback for BusinessException).
+     *
+     * @param ex The business exception
+     * @return A response entity with error details
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<BaseResponse<Void>> handleBusinessException(BusinessException ex) {
+        log.warn("Business exception occurred, requestId: {}, traceId: {}, errorCode: {}, message: {}",
+                getRequestId(), getTraceId(), ex.getErrorCode().getCode(), ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(addIds(BaseResponse.error(ex.getMessage())));
     }
 

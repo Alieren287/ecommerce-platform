@@ -6,6 +6,8 @@ import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.service.ImageStorageService;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
@@ -70,7 +72,7 @@ public class DeleteProductImageUseCase {
             Product product = productRepository.findById(input.productId())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.productId());
-                        return new ProductException.ProductNotFoundException(input.productId());
+                        return new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
                     });
 
             String imageUrlToDelete = input.imageUrlToDelete();

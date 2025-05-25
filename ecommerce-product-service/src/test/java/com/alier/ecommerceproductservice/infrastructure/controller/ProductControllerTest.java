@@ -8,6 +8,7 @@ import com.alier.ecommerceproductservice.application.usecase.CreateProductUseCas
 import com.alier.ecommerceproductservice.application.usecase.GetProductUseCase;
 import com.alier.ecommerceproductservice.application.usecase.UpdateProductUseCase;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.ProductStatus;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
@@ -115,7 +116,7 @@ class ProductControllerTest {
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
-                .thenThrow(new ProductException.ProductSkuAlreadyExistsException("DUPLICATE-SKU"));
+                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_SKU_EXISTS, ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS));
 
         // When & Then
         mockMvc.perform(post("/api/v1/products")
@@ -123,7 +124,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is("Product with SKU DUPLICATE-SKU already exists")));
+                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_SKU_ALREADY_EXISTS)));
     }
 
     @Test
@@ -140,8 +141,8 @@ class ProductControllerTest {
         );
 
         when(createProductUseCase.execute(any(CreateProductRequest.class)))
-                .thenThrow(new ProductException(ProductErrorCode.INVALID_PRODUCT_NAME,
-                        "Product name is too long (max 255 characters)"));
+                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NAME_TOO_LONG,
+                        ProductErrorMessages.PRODUCT_NAME_TOO_LONG));
 
         // When & Then
         mockMvc.perform(post("/api/v1/products")
@@ -149,7 +150,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is("Product name is too long (max 255 characters)")));
+                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NAME_TOO_LONG)));
     }
 
     @Test
@@ -184,13 +185,13 @@ class ProductControllerTest {
         UUID productId = UUID.randomUUID();
 
         when(getProductUseCase.getById(productId))
-                .thenThrow(new ProductException.ProductNotFoundException(productId));
+                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID));
 
         // When & Then
         mockMvc.perform(get("/api/v1/products/{id}", productId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is("Product not found with id: " + productId)));
+                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID)));
     }
 
     @Test
@@ -280,7 +281,7 @@ class ProductControllerTest {
         );
 
         when(updateProductUseCase.execute(Mockito.eq(productId), any(UpdateProductRequest.class)))
-                .thenThrow(new ProductException.ProductNotFoundException(productId));
+                .thenThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID));
 
         // When & Then
         mockMvc.perform(put("/api/v1/products/{id}", productId)
@@ -288,7 +289,7 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success", is(false)))
-                .andExpect(jsonPath("$.message", is("Product not found with id: " + productId)));
+                .andExpect(jsonPath("$.message", is(ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID)));
     }
 
     @Configuration

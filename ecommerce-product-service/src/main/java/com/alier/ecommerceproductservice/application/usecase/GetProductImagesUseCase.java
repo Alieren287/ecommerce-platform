@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
+
 @UseCase(description = "Retrieves all image URLs for a product.")
 @RequiredArgsConstructor
 @Slf4j
@@ -55,7 +58,7 @@ public class GetProductImagesUseCase {
             Product product = productRepository.findById(input.productId())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.productId());
-                        return new ProductException.ProductNotFoundException(input.productId());
+                        return new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
                     });
 
             List<String> imageUrls = product.getImageUrls();

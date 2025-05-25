@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
+
 /**
  * Use case for deleting product variants.
  */
@@ -43,7 +46,7 @@ public class DeleteProductVariantUseCase {
         protected void validate(UUID variantId) throws BusinessException {
             // Check if variant exists
             if (!productVariantRepository.existsById(variantId)) {
-                throw new ProductException.ProductVariantNotFoundException(variantId);
+                throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_ID);
             }
 
         }

@@ -51,8 +51,8 @@ class ProductTest {
             Product.create(name, description, price, stockQuantity, sku);
         });
 
-        assertEquals(ProductErrorCode.INVALID_PRODUCT_NAME, exception.getErrorCode());
-        assertTrue(exception.getMessage().contains("cannot be empty"));
+        assertEquals(ProductErrorCode.PRODUCT_NAME_NULL, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("required"));
     }
 
     @Test
@@ -70,7 +70,7 @@ class ProductTest {
             Product.create(name, description, price, stockQuantity, sku);
         });
 
-        assertEquals(ProductErrorCode.INVALID_PRODUCT_PRICE, exception.getErrorCode());
+        assertEquals(ProductErrorCode.PRODUCT_PRICE_NEGATIVE, exception.getErrorCode());
         assertTrue(exception.getMessage().contains("cannot be negative"));
     }
 
@@ -90,8 +90,8 @@ class ProductTest {
             product.activate();
         });
 
-        assertEquals(ProductErrorCode.PRODUCT_ACTIVATION_FAILED, exception.getErrorCode());
-        assertTrue(exception.getMessage().contains("Cannot activate"));
+        assertEquals(ProductErrorCode.PRODUCT_ACTIVATION_NO_IMAGES, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("no images"));
     }
 
     @Test
@@ -110,8 +110,8 @@ class ProductTest {
             product.activate();
         });
 
-        assertEquals(ProductErrorCode.PRODUCT_ACTIVATION_FAILED, exception.getErrorCode());
-        assertTrue(exception.getMessage().contains("Cannot activate"));
+        assertEquals(ProductErrorCode.PRODUCT_ACTIVATION_NO_STOCK, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("no stock"));
     }
 
     @Test
@@ -147,10 +147,11 @@ class ProductTest {
         int decreaseAmount = 15;
 
         // When & Then
-        ProductException.ProductOutOfStockException exception = assertThrows(ProductException.ProductOutOfStockException.class, () -> {
+        ProductException exception = assertThrows(ProductException.class, () -> {
             product.decreaseStock(decreaseAmount);
         });
 
         assertEquals(ProductErrorCode.PRODUCT_OUT_OF_STOCK, exception.getErrorCode());
+        assertTrue(exception.getMessage().contains("out of stock"));
     }
 } 

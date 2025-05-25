@@ -8,6 +8,8 @@ import com.alier.ecommerceproductservice.application.dto.ProductVariantResponse;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.ProductVariant;
 import com.alier.ecommerceproductservice.domain.repository.ProductVariantRepository;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -94,11 +96,11 @@ public class UpdateProductVariantUseCase {
             
             // Find the variant
             ProductVariant variant = productVariantRepository.findById(variantId)
-                    .orElseThrow(() -> new ProductException.ProductVariantNotFoundException(variantId));
+                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_ID));
             
             // Check if SKU changed and is already in use
             if (!variant.getSku().equals(request.getSku()) && productVariantRepository.existsBySku(request.getSku())) {
-                throw new ProductException.ProductVariantSkuAlreadyExistsException(request.getSku());
+                throw new ProductException(ProductErrorCode.PRODUCT_VARIANT_SKU_EXISTS, ProductErrorMessages.PRODUCT_VARIANT_SKU_ALREADY_EXISTS);
             }
             
             // Update the variant
@@ -127,7 +129,7 @@ public class UpdateProductVariantUseCase {
             
             // Find the variant
             ProductVariant variant = productVariantRepository.findById(variantId)
-                    .orElseThrow(() -> new ProductException.ProductVariantNotFoundException(variantId));
+                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_VARIANT_NOT_FOUND, ProductErrorMessages.PRODUCT_VARIANT_NOT_FOUND_BY_ID));
             
             // Update stock
             variant = variant.updateStock(stockQuantity);

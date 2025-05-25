@@ -72,38 +72,40 @@ public class Product {
     }
 
     private static void validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_NAME,
-                    "Product name cannot be empty");
+        if (name == null) {
+            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_NULL);
+        }
+        
+        if (name.trim().isEmpty()) {
+            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_EMPTY);
         }
 
         if (name.length() > 255) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_NAME,
-                    "Product name is too long (max 255 characters)");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_NAME_TOO_LONG);
         }
     }
 
     private static void validatePrice(BigDecimal price) {
         if (price == null) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_PRICE,
-                    "Price cannot be null");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_NULL);
         }
 
         if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_PRICE,
-                    "Price cannot be negative");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_NEGATIVE);
+        }
+        
+        if (price.compareTo(BigDecimal.ZERO) == 0) {
+            throw ProductException.validation(ProductErrorCode.PRODUCT_PRICE_ZERO);
         }
     }
 
     private static void validateStockQuantity(Integer stockQuantity) {
         if (stockQuantity == null) {
-            throw new ProductException(ProductErrorCode.INVALID_STOCK_QUANTITY,
-                    "Stock quantity cannot be null");
+            throw ProductException.validation(ProductErrorCode.STOCK_QUANTITY_NULL);
         }
 
         if (stockQuantity < 0) {
-            throw new ProductException(ProductErrorCode.INVALID_STOCK_QUANTITY,
-                    "Stock quantity cannot be negative");
+            throw ProductException.validation(ProductErrorCode.STOCK_QUANTITY_NEGATIVE);
         }
     }
 
@@ -144,12 +146,10 @@ public class Product {
      */
     public Product activate() {
         if (this.stockQuantity <= 0) {
-            throw new ProductException(ProductErrorCode.PRODUCT_ACTIVATION_FAILED,
-                    "Cannot activate a product with no stock");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_STOCK);
         }
         if (this.imageUrls == null || this.imageUrls.isEmpty()) {
-            throw new ProductException(ProductErrorCode.PRODUCT_ACTIVATION_FAILED,
-                    "Cannot activate a product with no images. Please upload at least one image.");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_ACTIVATION_NO_IMAGES);
         }
 
         this.status = ProductStatus.ACTIVE;
@@ -173,12 +173,11 @@ public class Product {
      */
     public Product decreaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION,
-                    "Quantity to decrease must be positive");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_DECREASE_QUANTITY_INVALID);
         }
 
         if (this.stockQuantity < quantity) {
-            throw new ProductException.ProductOutOfStockException(this.id.toString());
+            throw ProductException.conflict(ProductErrorCode.PRODUCT_OUT_OF_STOCK);
         }
 
         this.stockQuantity -= quantity;
@@ -192,8 +191,7 @@ public class Product {
      */
     public Product increaseStock(int quantity) {
         if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION,
-                    "Quantity to increase must be positive");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_INCREASE_QUANTITY_INVALID);
         }
 
         this.stockQuantity += quantity;
@@ -210,7 +208,7 @@ public class Product {
      */
     public Product addImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION, "Image URL cannot be empty.");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
         }
         if (this.imageUrls == null) {
             this.imageUrls = new ArrayList<>();
@@ -230,7 +228,7 @@ public class Product {
      */
     public Product removeImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw new ProductException(ProductErrorCode.INVALID_PRODUCT_OPERATION, "Image URL cannot be empty for removal.");
+            throw ProductException.validation(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY);
         }
         if (this.imageUrls != null && this.imageUrls.remove(imageUrl)) {
             this.updatedAt = LocalDateTime.now();

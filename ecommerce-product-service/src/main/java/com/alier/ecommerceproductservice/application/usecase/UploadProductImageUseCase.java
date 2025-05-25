@@ -1,18 +1,17 @@
 package com.alier.ecommerceproductservice.application.usecase;
 
 import com.alier.ecommercecore.annotations.UseCase;
-import com.alier.ecommercecore.common.exception.BusinessException;
 import com.alier.ecommercecore.common.usecase.UseCaseHandler;
 import com.alier.ecommerceproductservice.application.dto.ProductDTO;
 import com.alier.ecommerceproductservice.application.service.ImageStorageService;
 import com.alier.ecommerceproductservice.domain.exception.ProductErrorCode;
+import com.alier.ecommerceproductservice.domain.exception.ProductErrorMessages;
 import com.alier.ecommerceproductservice.domain.exception.ProductException;
 import com.alier.ecommerceproductservice.domain.model.Product;
 import com.alier.ecommerceproductservice.domain.repository.ProductRepository;
 import com.alier.ecommerceproductservice.infrastructure.cache.ProductCacheService;
 import com.alier.ecommerceproductservice.infrastructure.messaging.ProductEventPublisher;
 import com.alier.ecommerceproductservice.infrastructure.search.ProductSearchService;
-import com.alier.ecommercewebcore.rest.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,30 +50,30 @@ public class UploadProductImageUseCase {
     private class UploadProductImageUseCaseHandler extends UseCaseHandler<UploadProductImageInput, ProductDTO> {
 
         @Override
-        protected void validate(UploadProductImageInput input) throws BusinessException {
+        protected void validate(UploadProductImageInput input) throws ProductException {
             if (input.productId() == null) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Product ID cannot be null.");
+                throw new ProductException(ProductErrorCode.PRODUCT_NAME_NULL, "Product ID cannot be null.");
             }
             if (input.imageFile() == null || input.imageFile().isEmpty()) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Image file cannot be empty.");
+                throw new ProductException(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY, "Image file cannot be empty.");
             }
             if (input.imageFile().getSize() > MAX_FILE_SIZE_BYTES) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Image file size exceeds the limit of " + (MAX_FILE_SIZE_BYTES / (1024 * 1024)) + "MB.");
+                throw new ProductException(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY, "Image file size exceeds the limit of " + (MAX_FILE_SIZE_BYTES / (1024 * 1024)) + "MB.");
             }
             String contentType = input.imageFile().getContentType();
             if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
-                throw new BusinessException(GlobalErrorCode.VALIDATION_ERROR, "Invalid image file type. Allowed types: " + ALLOWED_IMAGE_TYPES);
+                throw new ProductException(ProductErrorCode.PRODUCT_IMAGE_URL_EMPTY, "Invalid image file type. Allowed types: " + ALLOWED_IMAGE_TYPES);
             }
         }
 
         @Override
-        protected ProductDTO handle(UploadProductImageInput input) throws BusinessException {
+        protected ProductDTO handle(UploadProductImageInput input) throws ProductException {
             log.debug("Attempting to upload image for product ID: {}", input.productId());
 
             Product product = productRepository.findById(input.productId())
                     .orElseThrow(() -> {
                         log.warn("Product not found with ID: {}", input.productId());
-                        return new ProductException.ProductNotFoundException(input.productId());
+                        return new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND, ProductErrorMessages.PRODUCT_NOT_FOUND_BY_ID);
                     });
 
             String storedImagePath;
@@ -82,7 +81,8 @@ public class UploadProductImageUseCase {
                 storedImagePath = imageStorageService.storeImage(input.productId(), input.imageFile());
             } catch (IOException e) {
                 log.error("Failed to store image for product ID {}: {}", input.productId(), e.getMessage(), e);
-                throw new ProductException(ProductErrorCode.PRODUCT_UPDATE_FAILED, "Failed to store product image: " + e.getMessage());
+                throw new ProductException(ProductErrorCode.PRODUCT_UPDATE_FAILED,
+                        ProductErrorMessages.PRODUCT_UPDATE_OPERATION_FAILED);
             }
 
             // Get the full public URL for the stored image path
